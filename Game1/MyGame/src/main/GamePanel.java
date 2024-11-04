@@ -9,10 +9,12 @@ import java.awt.Graphics2D;
 import javax.swing.JPanel;
 import messages.MessageManager;
 import object.SuperObject;
+import tile.RandomAnimation;
 import tile.TileManager;
 
 
-public class GamePanel extends JPanel implements Runnable{
+@SuppressWarnings("InitializerMayBeStatic")
+public class GamePanel extends JPanel implements Runnable {
 
     // Screen Settings
 
@@ -27,23 +29,29 @@ public class GamePanel extends JPanel implements Runnable{
     public final int screenHeight = tileSize * maxScreenRow;
 
     // World Settings
-    public final int maxWorldCol = 50;
-    public final int maxWorldRow = 50;
+    public int maxWorldCol;
+    public int maxWorldRow;
     public final int worldWidth = tileSize * maxWorldCol;
     public final int worldHeight = tileSize * maxWorldRow;
+
+    public int numMap = 0;
+
 
 
     // FPS
     int FPS = 60;
 
+    public TileManager tileM = new TileManager(this);
+    public RandomAnimation rAnimate = new RandomAnimation(this);
 
-    TileManager tileM = new TileManager(this);
+    
     KeyHandler keyH = new KeyHandler();
     Thread gameThread;
     public CollisionChecker cChecker = new CollisionChecker(this);
     public AssetSetter aSetter = new AssetSetter(this);
     public MessageManager mManager = new MessageManager(this);
     public Player player = new Player(this, keyH, aSetter, mManager);
+    public UI ui = new UI(this);
     
     public SuperObject obj[] = new SuperObject[10];
 
@@ -117,9 +125,30 @@ public class GamePanel extends JPanel implements Runnable{
           
         Graphics2D g2 = (Graphics2D)g;
 
+        // DEBUG
 
-        // tile
-        tileM.draw(g2);
+        long drawStart = 0;
+        
+        if (keyH.checkDrawTime == true) {
+            drawStart = System.nanoTime();
+        }
+
+        
+
+
+
+        // drawing map "0"
+
+
+        tileM.draw(g2, numMap);
+
+
+
+
+
+
+
+        rAnimate.animateRandom(g2, numMap);
 
         //Object
         for (SuperObject obj1 : obj) {
@@ -132,11 +161,49 @@ public class GamePanel extends JPanel implements Runnable{
         // player
         player.draw(g2);
 
+        ui.draw(g2);
+
         mManager.sendMessage(g2);
+
+
+        // debug
+
+        if (keyH.checkDrawTime == true) {
+            long drawEnd = System.nanoTime();
+            long passed = drawEnd - drawStart;
+            g2.setColor(Color.white);
+            g2.drawString("Draw Time: " + passed, 10, 400);
+            System.out.println("Draw Time: " + passed);
+        }
+        
+
+        
 
         g2.dispose();
        
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public KeyHandler getKeyH() {
         return keyH;
@@ -144,6 +211,14 @@ public class GamePanel extends JPanel implements Runnable{
 
     public void setKeyH(KeyHandler keyH) {
         this.keyH = keyH;
+    }
+
+    public TileManager getTileM() {
+        return tileM;
+    }
+
+    public void setTileM(TileManager tileM) {
+        this.tileM = tileM;
     }
 
     

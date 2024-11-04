@@ -4,11 +4,11 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import javax.imageio.ImageIO;
 import main.AssetSetter;
 import main.GamePanel;
 import main.KeyHandler;
+import main.UtilityTool;
 import messages.MessageManager;
 
 
@@ -23,9 +23,10 @@ import messages.MessageManager;
 
     public final int screenX;
     public final int screenY;
-    int hasKey = 0;
+    public int hasKey = 0;
     public boolean chestOpen = false;
     public boolean hasBoots = false;
+    public int moveSpeed;
 
 
 
@@ -58,9 +59,9 @@ import messages.MessageManager;
 
     public final void setDefaultValues() {
 
-        worldX = gp.tileSize * 25;
+        worldX = gp.tileSize * 12;
         worldY = gp.tileSize * 25;
-        speed = 4;
+        speed = 3;
         direction = "down";
 
     }
@@ -71,25 +72,19 @@ import messages.MessageManager;
     public final void getPlayerImage() {
 
 
-        try {
-
-            up1 = ImageIO.read(new File("./res/player/backward1.png"));
-            up2 = ImageIO.read(new File("./res/player/backward2.png"));            
-            down1 = ImageIO.read(new File("./res/player/forward1.png"));            
-            down2 = ImageIO.read(new File("./res/player/forward2.png"));            
-            left1 = ImageIO.read(new File("./res/player/left1.png"));
-            left2 = ImageIO.read(new File("./res/player/leftIdle1.png"));
-            right1 = ImageIO.read(new File("./res/player/right1.png"));
-            right2 = ImageIO.read(new File("./res/player/rightIdle1.png"));
-            idle1 = ImageIO.read(new File("./res/player/idle1.png"));
-            idle2 = ImageIO.read(new File("./res/player/idle2.png"));
-            idle3 = ImageIO.read(new File("./res/player/idle3.png"));
-            idle4 = ImageIO.read(new File("./res/player/idle4.png"));
-            upIdle1 = ImageIO.read(new File("./res/player/backwardIdle1.png"));
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        up1 = setup("backward1");
+        up2 = setup("backward2");
+        down1 = setup("forward1");
+        down2 = setup("forward2");
+        left1 = setup("left1");
+        left2 = setup("leftIdle1");
+        right1 = setup("right1");
+        right2 = setup("rightIdle1");
+        idle1 = setup("idle1");
+        idle2 = setup("idle2");
+        idle3 = setup("idle3");
+        idle4 = setup("idle4");
+        upIdle1 = setup("backwardIdle1");
 
 
 
@@ -99,27 +94,38 @@ import messages.MessageManager;
     public final void updatePlayerImageBoots() {
 
 
+        up1 = setup("backward1B");
+        up2 = setup("backward2B");
+        down1 = setup("forward1B");
+        down2 = setup("forward2B");
+        left1 = setup("left1B");
+        left2 = setup("leftIdle1B");
+        right1 = setup("right1B");
+        right2 = setup("rightIdle1B");
+        idle1 = setup("idle1B");
+        idle2 = setup("idle2B");
+        idle3 = setup("idle3B");
+        idle4 = setup("idle4B");
+        upIdle1 = setup("backwardIdle1B");
+
+
+
+
+    }
+
+    @SuppressWarnings({"UseSpecificCatch", "CallToPrintStackTrace"})
+    public BufferedImage setup(String imageName) {
+        UtilityTool uTool = new UtilityTool();
+        BufferedImage image = null;
+
         try {
+            image = ImageIO.read(new File("./res/player/" + imageName + ".png"));
+            image = uTool.scaleImage(image, gp.tileSize, gp.tileSize);
 
-            up1 = ImageIO.read(new File("./res/player/backward1B.png"));
-            up2 = ImageIO.read(new File("./res/player/backward2B.png"));            
-            down1 = ImageIO.read(new File("./res/player/forward1B.png"));            
-            down2 = ImageIO.read(new File("./res/player/forward2B.png"));            
-            left1 = ImageIO.read(new File("./res/player/left1B.png"));
-            left2 = ImageIO.read(new File("./res/player/leftIdle1B.png"));
-            right1 = ImageIO.read(new File("./res/player/right1B.png"));
-            right2 = ImageIO.read(new File("./res/player/rightIdle1B.png"));
-            idle1 = ImageIO.read(new File("./res/player/idle1B.png"));
-            idle2 = ImageIO.read(new File("./res/player/idle2B.png"));
-            idle3 = ImageIO.read(new File("./res/player/idle3B.png"));
-            idle4 = ImageIO.read(new File("./res/player/idle4B.png"));
-            upIdle1 = ImageIO.read(new File("./res/player/backwardIdle1B.png"));
-
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
-
+        return image;
 
     }
 
@@ -128,9 +134,13 @@ import messages.MessageManager;
 
     public void update() {
 
+        int objIndex = 0;
+
         // animations
 
-        updateMovingAnimation();
+        sprint();
+
+        updateMovingAnimation(moveSpeed);
         updateIdleAnimation();
 
         // check tile collision
@@ -139,7 +149,10 @@ import messages.MessageManager;
         // check tile and object collision and get index of collided object
 
 
-        int objIndex = collisionDetector();
+ // normal case:
+        objIndex = collisionDetector(); 
+        
+        
 
         // Checks key and chest objects
         keyUpdate(objIndex);
@@ -163,6 +176,7 @@ import messages.MessageManager;
         image = drawMovingAnimation(image);
         image = drawIdleAnimation(image);
 
+
         g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
 
     }
@@ -178,14 +192,15 @@ import messages.MessageManager;
                     case "Key" -> {
                         hasKey++;
                         gp.obj[i] = null;
-                        System.out.println("Key:" + hasKey);
+                        gp.ui.showMessage("Key gained!");
                     }
                     case "Chest" -> {
                         if(hasKey > 0) {
                             gp.obj[i].image = gp.obj[i].open;
                             hasKey--;
                             chestOpen = true;
-                            System.out.println("Key:" + hasKey);
+                        } else if (hasKey == 0 && gp.obj[i].image != gp.obj[i].open) {
+                            gp.ui.showMessage("Maybe... Key?");
                         }
                     }
                 }
@@ -207,9 +222,7 @@ import messages.MessageManager;
                             hasBoots = true;
                             mManager.bootsMessage();
                             updatePlayerImageBoots();
-                            if (hasBoots) {
-                                speed++;
-                            }
+                            
 
                         }
                         
@@ -220,6 +233,24 @@ import messages.MessageManager;
 
         }
     }
+
+
+
+
+    public void sprint() {
+        if (hasBoots && keyH.shiftPressed == true) {
+            moveSpeed = 7;
+            speed = 5;
+        } else {
+            speed = 3;
+            moveSpeed = 11;
+        }
+
+    }
+
+
+
+
 
     public void chestOpen() {
         if (chestOpen) {
@@ -378,7 +409,7 @@ import messages.MessageManager;
     
 
 
-    public void updateMovingAnimation() {
+    public void updateMovingAnimation(int speed) {
         if (keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true || keyH.rightPressed == true) {
             if(keyH.upPressed == true) {
                 direction = "up";
@@ -396,7 +427,7 @@ import messages.MessageManager;
 
 
             spriteCounter++;
-            if (spriteCounter > 8) {
+            if (spriteCounter > speed) {
                 if (spriteNum == 1) {
                     spriteNum = 2;
                 } else if (spriteNum == 2) {
@@ -438,7 +469,7 @@ import messages.MessageManager;
         if (keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true || keyH.rightPressed == true) {
 
 
-            gp.cChecker.checkTile(this);
+            gp.cChecker.checkTile(this, gp.numMap);
             int i = gp.cChecker.checkObject(this, true);
             
 
@@ -456,6 +487,7 @@ import messages.MessageManager;
         }
         return 999;
     }
+
 
 
 

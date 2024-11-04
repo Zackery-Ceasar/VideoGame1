@@ -18,29 +18,25 @@ public class AssetSetter {
 
 
     public void setObject() {
-        gp.obj[0] = new OBJ_Key();
-        gp.obj[0].worldX = 18 * gp.tileSize;
-        gp.obj[0].worldY = 45 * gp.tileSize;
+        gp.obj[0] = new OBJ_Key(gp);
+        gp.obj[0].worldX = 46 * gp.tileSize;
+        gp.obj[0].worldY = 32 * gp.tileSize;
 
-        gp.obj[1] = new OBJ_Door();
-        gp.obj[1].worldX = 17 * gp.tileSize;
-        gp.obj[1].worldY = 47 * gp.tileSize;
+        gp.obj[1] = new OBJ_Door(gp);
+        gp.obj[1].worldX = 48 * gp.tileSize;
+        gp.obj[1].worldY = 33 * gp.tileSize;
 
-        gp.obj[2] = new OBJ_Door();
-        gp.obj[2].worldX = 47 * gp.tileSize;
-        gp.obj[2].worldY = 25 * gp.tileSize;
+        gp.obj[2] = new OBJ_Door(gp);
+        gp.obj[2].worldX = 48 * gp.tileSize;
+        gp.obj[2].worldY = 30 * gp.tileSize;
 
-        gp.obj[3] = new OBJ_Door();
-        gp.obj[3].worldX = 43 * gp.tileSize;
-        gp.obj[3].worldY = 19 * gp.tileSize;
+        gp.obj[3] = new OBJ_Door(gp);
+        gp.obj[3].worldX = 15 * gp.tileSize;
+        gp.obj[3].worldY = 16 * gp.tileSize;
 
-        gp.obj[4] = new OBJ_Door();
-        gp.obj[4].worldX = 46 * gp.tileSize;
-        gp.obj[4].worldY = 13 * gp.tileSize;
-
-        gp.obj[5] = new OBJ_Chest();
-        gp.obj[5].worldX = 46 * gp.tileSize;
-        gp.obj[5].worldY = 10 * gp.tileSize;
+        gp.obj[5] = new OBJ_Chest(gp);
+        gp.obj[5].worldX = 16 * gp.tileSize;
+        gp.obj[5].worldY = 13 * gp.tileSize;
         
         
 
@@ -54,9 +50,9 @@ public class AssetSetter {
 
     public void chestOne() {
         if (gp.obj[5].image == gp.obj[5].open && !gp.player.hasBoots) {
-            gp.obj[6] = new OBJ_Boots();
-            gp.obj[6].worldX = 46 * gp.tileSize;
-            gp.obj[6].worldY = 8 * gp.tileSize;
+            gp.obj[6] = new OBJ_Boots(gp);
+            gp.obj[6].worldX = gp.obj[5].worldX;
+            gp.obj[6].worldY = gp.obj[5].worldY - (3 * gp.tileSize);
             animationActive = true;
         }
     }
@@ -68,7 +64,7 @@ public class AssetSetter {
     }
 
     public void bootsAnimation() {
-        while (gp.obj[6].worldY != 11 * gp.tileSize && gp.obj[6] != null) {
+        while (gp.obj[6].worldY != gp.obj[5].worldY + gp.tileSize && gp.obj[6] != null) {
             gp.obj[6].worldY += 1;
             return;
         }
