@@ -18,7 +18,7 @@ final public class TileManager {
     GamePanel gp;
     public Tile[] tile;
     public int mapTileNum[][][];
-    public int numMaps = 1;
+    public int numMaps = 2;
 
     ArrayList<String> fileNames = new ArrayList<>();
     ArrayList<String> collisionStatus = new ArrayList<>();
@@ -121,6 +121,7 @@ final public class TileManager {
 
         // loads map into map "0"
         loadMap("res/maps/worldMap1.txt", 0);
+        loadMap("res/maps/houses1.txt", 1);
 
     }
 
@@ -154,8 +155,8 @@ final public class TileManager {
                 } else {
                     collision = false;
                 }
-                System.out.println(fileName);
-                System.out.println(collision);
+                //System.out.println(fileName);
+                //System.out.println(collision);
 
                 setup(i, fileName, collision);
 

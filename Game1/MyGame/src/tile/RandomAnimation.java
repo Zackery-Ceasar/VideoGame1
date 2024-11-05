@@ -178,6 +178,16 @@ final public class RandomAnimation {
         gp.tileM.tile[117].animated = true;
         gp.tileM.tile[117].linked = 17;
 
+        // Water
+
+        gp.tileM.tile[151].animated = true;
+        gp.tileM.tile[151].linked = 152;
+        
+        gp.tileM.tile[152].animated = true;
+        gp.tileM.tile[152].linked = 151;
+
+        
+
 
 
         

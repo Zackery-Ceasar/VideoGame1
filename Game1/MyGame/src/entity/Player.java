@@ -13,7 +13,7 @@ import messages.MessageManager;
 
 
 
- public class Player extends Entity {
+public class Player extends Entity {
     GamePanel gp;
     KeyHandler keyH;
     AssetSetter aSetter;
@@ -27,6 +27,8 @@ import messages.MessageManager;
     public boolean chestOpen = false;
     public boolean hasBoots = false;
     public int moveSpeed;
+    public boolean switchScreen = false;
+    public int checkMap = 0;
 
 
 
@@ -165,6 +167,9 @@ import messages.MessageManager;
         // Door functions
         doorUpdateOpen(objIndex);
         doorUpdateClose(doorOpen);
+
+
+        closeAllDoorsWhenSwitched();
         
     }
 
@@ -185,21 +190,21 @@ import messages.MessageManager;
     public void keyUpdate(int i) {
         if (i != 999) {
 
-            if (gp.obj[i] != null) {
-                String objectName = gp.obj[i].name;
+            if (gp.obj[gp.numMap][i] != null) {
+                String objectName = gp.obj[gp.numMap][i].name;
 
                 switch(objectName) {
                     case "Key" -> {
                         hasKey++;
-                        gp.obj[i] = null;
+                        gp.obj[gp.numMap][i] = null;
                         gp.ui.showMessage("Key gained!");
                     }
                     case "Chest" -> {
                         if(hasKey > 0) {
-                            gp.obj[i].image = gp.obj[i].open;
+                            gp.obj[gp.numMap][i].image = gp.obj[gp.numMap][i].open;
                             hasKey--;
                             chestOpen = true;
-                        } else if (hasKey == 0 && gp.obj[i].image != gp.obj[i].open) {
+                        } else if (hasKey == 0 && gp.obj[gp.numMap][i].image != gp.obj[gp.numMap][i].open) {
                             gp.ui.showMessage("Maybe... Key?");
                         }
                     }
@@ -211,14 +216,15 @@ import messages.MessageManager;
 
     public void bootsUpdate(int i) {
         if (i != 999) {
+            //System.out.println("int: " + i);
 
-            if (gp.obj[i] != null) {
-                String objectName = gp.obj[i].name;
+            if (gp.obj[gp.numMap][i] != null) {
+                String objectName = gp.obj[gp.numMap][i].name;
 
                 switch(objectName) {
                     case "Boots" -> {
                         if(!aSetter.animationActive) {
-                            gp.obj[i] = null;
+                            gp.obj[gp.numMap][i] = null;
                             hasBoots = true;
                             mManager.bootsMessage();
                             updatePlayerImageBoots();
@@ -263,14 +269,23 @@ import messages.MessageManager;
     public void doorUpdateOpen(int i) {
         if (i != 999) {
 
-            if (gp.obj[i] != null) {
-                String objectName = gp.obj[i].name;
+            if (gp.obj[gp.numMap][i] != null) {
+                String objectName = gp.obj[gp.numMap][i].name;
                 switch(objectName) {
                     case "Door" -> {
-                        if (gp.obj[i].collision) {
-                            gp.obj[i].collision = false;
-                            gp.obj[i].image = gp.obj[i].open;
+                        if (gp.obj[gp.numMap][i].collision) {
+                            gp.obj[gp.numMap][i].collision = false;
+                            gp.obj[gp.numMap][i].image = gp.obj[gp.numMap][i].open;
                             doorOpen = i;
+                            checkMap = gp.numMap;
+                        }
+                    }
+                    case "Door2" -> {
+                        if (gp.obj[gp.numMap][i].collision) {
+                            gp.obj[gp.numMap][i].collision = false;
+                            gp.obj[gp.numMap][i].image = gp.obj[gp.numMap][i].open;
+                            doorOpen = i;
+                            checkMap = gp.numMap;
                         }
                     }
                 }
@@ -280,16 +295,46 @@ import messages.MessageManager;
         }
     }
 
+    public void closeAllDoorsWhenSwitched() {
+        if (switchScreen) {
+            for (int j = 0; j < gp.objectQTY; j++) {
+                for (int e = 0; e < gp.tileM.numMaps; e++) {
+                    if (gp.obj[e][j] != null) {
+                        String objectName = gp.obj[e][j].name;
+                        switch(objectName) {
+                            case "Door" -> {
+                                gp.obj[e][j].image = gp.obj[e][j].closed;
+                                gp.obj[e][j].collision = true;
+
+                            }
+                            case "Door2" -> {
+                                gp.obj[e][j].image = gp.obj[e][j].closed;
+                                gp.obj[e][j].collision = true;
+                                
+                            }
+                        }       
+
+                    }
+              }
+            }
+            switchScreen = false;
+        }
+    }
+    
+
     public void doorUpdateClose(int i) {
+        if (checkMap != gp.numMap) {
+            return;
+        }
 
         if (i != 999) {
 
             if (timer == 0) {
 
 
-                if (!gp.obj[i].collision) {
-                    gp.obj[i].collision = true;
-                    gp.obj[i].image = gp.obj[i].closed;
+                if (!gp.obj[checkMap][i].collision) {
+                    gp.obj[checkMap][i].collision = true;
+                    gp.obj[checkMap][i].image = gp.obj[gp.numMap][i].closed;
                     doorOpen = 999;
                 }
 

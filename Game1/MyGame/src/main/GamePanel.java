@@ -9,6 +9,7 @@ import java.awt.Graphics2D;
 import javax.swing.JPanel;
 import messages.MessageManager;
 import object.SuperObject;
+import tile.MapManager;
 import tile.RandomAnimation;
 import tile.TileManager;
 
@@ -36,6 +37,8 @@ public class GamePanel extends JPanel implements Runnable {
 
     public int numMap = 0;
 
+    public int  objectQTY = 10;
+
 
 
     // FPS
@@ -51,9 +54,10 @@ public class GamePanel extends JPanel implements Runnable {
     public AssetSetter aSetter = new AssetSetter(this);
     public MessageManager mManager = new MessageManager(this);
     public Player player = new Player(this, keyH, aSetter, mManager);
+    public MapManager mapM = new MapManager(this);
     public UI ui = new UI(this);
     
-    public SuperObject obj[] = new SuperObject[10];
+    public SuperObject obj[][] = new SuperObject[tileM.numMaps][objectQTY];
 
 
     public GamePanel() {
@@ -113,6 +117,7 @@ public class GamePanel extends JPanel implements Runnable {
        
         player.update();
         aSetter.objectAnimations();
+        //System.out.println("numMap: " + numMap);
 
     }
 
@@ -139,7 +144,7 @@ public class GamePanel extends JPanel implements Runnable {
 
         // drawing map "0"
 
-
+        numMap = mapM.checkLocation();
         tileM.draw(g2, numMap);
 
 
@@ -151,9 +156,9 @@ public class GamePanel extends JPanel implements Runnable {
         rAnimate.animateRandom(g2, numMap);
 
         //Object
-        for (SuperObject obj1 : obj) {
-            if (obj1 != null) {
-                obj1.draw(g2, this);
+        for (int i = 0; i < objectQTY; i++) {
+            if (obj[numMap][i] != null) {
+                obj[numMap][i].draw(g2, this);
             }
         }
           
