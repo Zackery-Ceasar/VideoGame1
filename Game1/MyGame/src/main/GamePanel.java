@@ -1,6 +1,7 @@
 package main;
 
 
+import entity.Entity;
 import entity.Player;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -12,6 +13,8 @@ import object.SuperObject;
 import tile.MapManager;
 import tile.RandomAnimation;
 import tile.TileManager;
+import tile.treeManager;
+
 
 
 @SuppressWarnings("InitializerMayBeStatic")
@@ -38,6 +41,7 @@ public class GamePanel extends JPanel implements Runnable {
     public int numMap = 0;
 
     public int  objectQTY = 10;
+    public int  NPCQTY = 10;
 
 
 
@@ -48,21 +52,32 @@ public class GamePanel extends JPanel implements Runnable {
     public RandomAnimation rAnimate = new RandomAnimation(this);
 
     
-    KeyHandler keyH = new KeyHandler();
+    public KeyHandler keyH = new KeyHandler(this);
     Thread gameThread;
     public CollisionChecker cChecker = new CollisionChecker(this);
     public AssetSetter aSetter = new AssetSetter(this);
     public MessageManager mManager = new MessageManager(this);
     public Player player = new Player(this, keyH, aSetter, mManager);
     public MapManager mapM = new MapManager(this);
+    public treeManager treeM = new treeManager(this);
     public UI ui = new UI(this);
+    public EventHandler eHandler = new EventHandler(this);
     
     public SuperObject obj[][] = new SuperObject[tileM.numMaps][objectQTY];
+    public Entity npc[][] = new Entity[tileM.numMaps][NPCQTY];
+
+    // GAME STATE
+
+    public int gameState;
+    public final int titleState = 0;
+    public final int playState = 1;
+    public final int pauseState = 2;
+    public final int dialogueState = 3;
 
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
-        this.setBackground(Color.white);
+        this.setBackground(Color.black);
         this.setDoubleBuffered(true);
         this.addKeyListener(keyH);
         this.setFocusable(true);
@@ -70,6 +85,8 @@ public class GamePanel extends JPanel implements Runnable {
 
     public void setupGame() {
         aSetter.setObject();
+        aSetter.setNPC();
+        gameState = titleState;
     }
 
     public void startGameThread() {
@@ -114,9 +131,29 @@ public class GamePanel extends JPanel implements Runnable {
     }
      
     public void update() {
+
+        if(gameState == playState) {
+            // PLAYER
+            player.update();
+            //NPC
+            for (int i = 0; i < NPCQTY; i++) {
+                if(npc[numMap][i] != null) {
+                    npc[numMap][i].update();
+                }
+            }
+
+
+            //ENVIRONMENT
+            aSetter.objectAnimations();
+        }
+
+
+
+        if (gameState == pauseState) {
+
+        }
        
-        player.update();
-        aSetter.objectAnimations();
+        
         //System.out.println("numMap: " + numMap);
 
     }
@@ -138,38 +175,78 @@ public class GamePanel extends JPanel implements Runnable {
             drawStart = System.nanoTime();
         }
 
+
+
+
+        // Title screen
+
+        if(gameState == titleState) {
+            ui.draw(g2);
+
+        } else { // OTHER
+
+
+
+
+            // drawing map "0"
+
+            numMap = mapM.checkLocation();
+            tileM.draw(g2, numMap);
+
+            
+
+            treeM.drawBehind(g2, numMap, 0);
+
+
+            //NPC BEHIND
+            for (int i = 0; i < NPCQTY; i++) {
+                if (npc[numMap][i] != null) {
+                    npc[numMap][i].drawBehind(g2);
+                }
+            }
+
+
+
+
+            rAnimate.animateRandom(g2, numMap);
+
+            //Object
+            for (int i = 0; i < objectQTY; i++) {
+                if (obj[numMap][i] != null) {
+                    obj[numMap][i].draw(g2, this);
+                }
+            }
+
+            
+
+            
+            
+
+            // player
+            player.draw(g2);
+
         
 
-
-
-        // drawing map "0"
-
-        numMap = mapM.checkLocation();
-        tileM.draw(g2, numMap);
-
-
-
-
-
-
-
-        rAnimate.animateRandom(g2, numMap);
-
-        //Object
-        for (int i = 0; i < objectQTY; i++) {
-            if (obj[numMap][i] != null) {
-                obj[numMap][i].draw(g2, this);
+            //NPC FRONT
+            for (int i = 0; i < NPCQTY; i++) {
+                if (npc[numMap][i] != null) {
+                    npc[numMap][i].drawFront(g2);
+                }
             }
+
+
+            treeM.drawFront(g2, numMap, 0);
+
+
+            ui.draw(g2);
+            mManager.sendMessage(g2);
+
         }
-          
 
-        // player
-        player.draw(g2);
 
-        ui.draw(g2);
 
-        mManager.sendMessage(g2);
-
+        
+        
 
         // debug
 
@@ -188,12 +265,12 @@ public class GamePanel extends JPanel implements Runnable {
        
     }
 
+        
 
 
 
 
-
-
+        
 
 
 

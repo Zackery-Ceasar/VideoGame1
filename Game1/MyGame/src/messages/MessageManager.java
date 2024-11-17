@@ -72,7 +72,7 @@ public class MessageManager {
             messages[0].image = ImageIO.read(new File("./res/messages/CONGRATS.png"));
 
             messages[1] = new Message();
-            messages[1].image = ImageIO.read(new File("./res/messages/YOUR_STRAIGHT_PIMPIN.png"));
+            messages[1].image = ImageIO.read(new File("./res/messages/PRESS_SHIFT_TO_SPRINT.png")); //res\messages\PRESS_SHIFT_TO_SPRINT.png
 
         } catch (Exception e) {
         }

@@ -103,8 +103,14 @@ final public class RandomAnimation {
 
 
             // Min row: 18 Max row: 32 Min col: 3 Max col 21
+
+            if (randomCol >= 0 && randomCol <= 99 && randomRow >= 0 && randomRow <= 99) {
+                randomTile = gp.tileM.mapTileNum[numMap][randomCol][randomRow];
+            } else {
+                randomTile = 1;
+            }
         
-            randomTile = gp.tileM.mapTileNum[numMap][randomCol][randomRow];
+            
 
             //System.out.println("random tile: " + randomTile + "  randomCol " + randomCol + "  randomRow " + randomRow);
 
@@ -142,7 +148,7 @@ final public class RandomAnimation {
     public void animate(Graphics2D g2, int numMap) {
 
 
-        if (animationGoing) {
+        if (animationGoing && animatedCol >= 0 && animatedRow >= 0) {
             //System.out.println("Animated Image; " + animatedCol + "," + animatedRow);
             gp.tileM.mapTileNum[numMap][animatedCol][animatedRow] = gp.tileM.tile[tileNum].linked;
             animationGoing = false;
@@ -170,22 +176,8 @@ final public class RandomAnimation {
         gp.tileM.tile[116].animated = true;
         gp.tileM.tile[116].linked = 1;
 
-        // trees
 
-        gp.tileM.tile[17].animated = true;
-        gp.tileM.tile[17].linked = 117;
         
-        gp.tileM.tile[117].animated = true;
-        gp.tileM.tile[117].linked = 17;
-
-        // Water
-
-        gp.tileM.tile[151].animated = true;
-        gp.tileM.tile[151].linked = 152;
-        
-        gp.tileM.tile[152].animated = true;
-        gp.tileM.tile[152].linked = 151;
-
         
 
 

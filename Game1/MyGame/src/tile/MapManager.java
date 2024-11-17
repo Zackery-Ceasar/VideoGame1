@@ -23,7 +23,7 @@ public class MapManager {
         this.gp = gp;
 
         switchCol = new int[] {48, 23, 41, 15};
-        switchRow = new int[] {32, 21, 22, 15};
+        switchRow = new int[] {33, 21, 22, 16};
         switchMap = new int[] {0, 1, 1, 0};
         switchMapTo = new int[] {1, 0, 0, 1};
         switchPosXTo = new int[] {23, 48, 15, 41};
@@ -116,3 +116,6 @@ public class MapManager {
 
 
 }
+
+
+

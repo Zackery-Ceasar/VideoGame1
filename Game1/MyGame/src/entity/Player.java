@@ -1,41 +1,48 @@
 package entity;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import javax.imageio.ImageIO;
 import main.AssetSetter;
 import main.GamePanel;
 import main.KeyHandler;
-import main.UtilityTool;
 import messages.MessageManager;
 
 
 
 public class Player extends Entity {
-    GamePanel gp;
     KeyHandler keyH;
     AssetSetter aSetter;
     MessageManager mManager;
 
-    public BufferedImage up1, up2, upIdle1, down1, down2, left1, left2, right1, right2, idle1, idle2, idle3, idle4;
+    
+
+    public BufferedImage image = null;
 
     public final int screenX;
     public final int screenY;
     public int hasKey = 0;
     public boolean chestOpen = false;
-    public boolean hasBoots = false;
+    public boolean hasBoots = false; // turn back to false
     public int moveSpeed;
+
+    // MAP CHANGERS
     public boolean switchScreen = false;
     public int checkMap = 0;
+    public boolean closeDoor = false;
+
+    // NPC
+    public int currentNPC;
+
+    
+
 
 
 
     public Player(GamePanel gp, KeyHandler keyH, AssetSetter aSetter, MessageManager mManager) {
 
-
-        this.gp = gp;
+        super(gp);
         this.keyH = keyH;
         this.aSetter = aSetter;
         this.mManager = mManager;
@@ -54,6 +61,8 @@ public class Player extends Entity {
 
         setDefaultValues();
         getPlayerImage();
+
+        
         
 
 
@@ -63,8 +72,17 @@ public class Player extends Entity {
 
         worldX = gp.tileSize * 12;
         worldY = gp.tileSize * 25;
-        speed = 3;
+        
         direction = "down";
+        width = gp.tileSize;
+        height = gp.tileSize + gp.tileSize/6;
+
+        // Player stats
+
+        speed = 3;
+        maxLife = 100;
+        life = maxLife;
+
 
     }
     
@@ -74,20 +92,41 @@ public class Player extends Entity {
     public final void getPlayerImage() {
 
 
-        up1 = setup("backward1");
-        up2 = setup("backward2");
-        down1 = setup("forward1");
-        down2 = setup("forward2");
-        left1 = setup("left1");
-        left2 = setup("leftIdle1");
-        right1 = setup("right1");
-        right2 = setup("rightIdle1");
-        idle1 = setup("idle1");
-        idle2 = setup("idle2");
-        idle3 = setup("idle3");
-        idle4 = setup("idle4");
-        upIdle1 = setup("backwardIdle1");
+        up1 = setup("./res/player/up1");
+        up2 = setup("./res/player/up2");
+        up3 = setup("./res/player/up3");
+        up4 = setup("./res/player/up4");
+        up5 = setup("./res/player/up5");
 
+        down1 = setup("./res/player/down1");
+        down2 = setup("./res/player/down2");
+        down3 = setup("./res/player/down3");
+        down4 = setup("./res/player/down4");
+        down5 = setup("./res/player/down5");
+        down6 = setup("./res/player/down6");
+
+        left1 = setup("./res/player/left1");
+        left2 = setup("./res/player/left2");
+        left3 = setup("./res/player/left3");
+        left4 = setup("./res/player/left4");
+        left5 = setup("./res/player/left5");
+        
+        right1 = setup("./res/player/right1");
+        right2 = setup("./res/player/right2");
+        right3 = setup("./res/player/right3");
+        right4 = setup("./res/player/right4");
+        right5 = setup("./res/player/right5");
+        
+        idle1 = setup("./res/player/idle1");
+        idle2 = setup("./res/player/idle2");
+        idle3 = setup("./res/player/idle3");
+        idle4 = setup("./res/player/idle4");
+
+        upIdle1 = setup("./res/player/idleUp1");
+
+        leftIdle1 = setup("./res/player/idleLeft1");
+
+        rightIdle1 = setup("./res/player/idleRight1");
 
 
     }
@@ -96,47 +135,51 @@ public class Player extends Entity {
     public final void updatePlayerImageBoots() {
 
 
-        up1 = setup("backward1B");
-        up2 = setup("backward2B");
-        down1 = setup("forward1B");
-        down2 = setup("forward2B");
-        left1 = setup("left1B");
-        left2 = setup("leftIdle1B");
-        right1 = setup("right1B");
-        right2 = setup("rightIdle1B");
-        idle1 = setup("idle1B");
-        idle2 = setup("idle2B");
-        idle3 = setup("idle3B");
-        idle4 = setup("idle4B");
-        upIdle1 = setup("backwardIdle1B");
+        up1 = setup("./res/player/up1B");
+        up2 = setup("./res/player/up2B");
+        up3 = setup("./res/player/up3B");
+        up4 = setup("./res/player/up4B");
+        up5 = setup("./res/player/up5B");
+
+        down1 = setup("./res/player/down1B");
+        down2 = setup("./res/player/down2B");
+        down3 = setup("./res/player/down3B");
+        down4 = setup("./res/player/down4B");
+        down5 = setup("./res/player/down5B");
+        down6 = setup("./res/player/down6B");
+
+        left1 = setup("./res/player/left1B");
+        left2 = setup("./res/player/left2B");
+        left3 = setup("./res/player/left3B");
+        left4 = setup("./res/player/left4B");
+        left5 = setup("./res/player/left5B");
+        
+        right1 = setup("./res/player/right1B");
+        right2 = setup("./res/player/right2B");
+        right3 = setup("./res/player/right3B");
+        right4 = setup("./res/player/right4B");
+        right5 = setup("./res/player/right5B");
+        
+        idle1 = setup("./res/player/idle1B");
+        idle2 = setup("./res/player/idle2B");
+        idle3 = setup("./res/player/idle3B");
+        idle4 = setup("./res/player/idle4B");
+
+        upIdle1 = setup("./res/player/idleUp1B");
+
+        leftIdle1 = setup("./res/player/idleLeft1B");
+
+        rightIdle1 = setup("./res/player/idleRight1B");
 
 
 
 
     }
 
-    @SuppressWarnings({"UseSpecificCatch", "CallToPrintStackTrace"})
-    public BufferedImage setup(String imageName) {
-        UtilityTool uTool = new UtilityTool();
-        BufferedImage image = null;
-
-        try {
-            image = ImageIO.read(new File("./res/player/" + imageName + ".png"));
-            image = uTool.scaleImage(image, gp.tileSize, gp.tileSize);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return image;
-
-    }
-
-
-
-
+    @Override
     public void update() {
 
-        int objIndex = 0;
+        int objIndex;
 
         // animations
 
@@ -145,15 +188,21 @@ public class Player extends Entity {
         updateMovingAnimation(moveSpeed);
         updateIdleAnimation();
 
+        image = drawMovingAnimation(image);
+        image = drawIdleAnimation(image);
+
         // check tile collision
         collisionOn = false;
 
-        // check tile and object collision and get index of collided object
+        //NPC COLLISION
 
+        int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
+        interactNPC(npcIndex);
 
- // normal case:
+        //EVENTS 
+        gp.eHandler.checkEvent();
+
         objIndex = collisionDetector(); 
-        
         
 
         // Checks key and chest objects
@@ -168,23 +217,62 @@ public class Player extends Entity {
         doorUpdateOpen(objIndex);
         doorUpdateClose(doorOpen);
 
-
         closeAllDoorsWhenSwitched();
         
     }
 
+    
     public void draw(Graphics2D g2) {
 
-
-        BufferedImage image = null;
-
-        image = drawMovingAnimation(image);
-        image = drawIdleAnimation(image);
-
-
-        g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
+        g2.setColor(new Color(0, 0, 0, 65));
+        g2.fillOval(screenX + 4, screenY + gp.tileSize-5, gp.tileSize *4/5, gp.tileSize/3);
+        g2.drawImage(image, screenX, screenY, width, height, null);
+        
 
     }
+
+
+
+    public void interactNPC(int i) {
+        //System.out.println(i);
+
+        if (i != 999) {
+            
+            gp.npc[gp.numMap][i].idle = true;
+            
+            
+            
+            if (gp.keyH.enterPressed) {
+                if (gp.npc[gp.numMap][i].dialogues[dialogueIndex] != null) {
+                    
+
+                    currentNPC = i;
+                    gp.gameState = gp.dialogueState;
+                    gp.npc[gp.numMap][i].speak();
+                    
+        
+
+            
+                }
+            }
+
+
+            
+        }
+        if (gp.gameState == gp.playState) {
+            currentNPC = 999;
+        }
+        gp.keyH.enterPressed = false;
+
+    }
+
+
+
+
+
+
+
+    
 
 
     public void keyUpdate(int i) {
@@ -197,16 +285,13 @@ public class Player extends Entity {
                     case "Key" -> {
                         hasKey++;
                         gp.obj[gp.numMap][i] = null;
-                        gp.ui.showMessage("Key gained!");
                     }
                     case "Chest" -> {
                         if(hasKey > 0) {
-                            gp.obj[gp.numMap][i].image = gp.obj[gp.numMap][i].open;
+                            gp.obj[gp.numMap][i].image = gp.obj[gp.numMap][i].alt[1];
                             hasKey--;
                             chestOpen = true;
-                        } else if (hasKey == 0 && gp.obj[gp.numMap][i].image != gp.obj[gp.numMap][i].open) {
-                            gp.ui.showMessage("Maybe... Key?");
-                        }
+                        } 
                     }
                 }
             }
@@ -245,11 +330,18 @@ public class Player extends Entity {
 
     public void sprint() {
         if (hasBoots && keyH.shiftPressed == true) {
-            moveSpeed = 7;
-            speed = 5;
+            moveSpeed = 9;
+            speed = 4;
+
+            if (spriteNum == 3) {
+                spriteNum++;
+            } else if (spriteNum == 7) {
+                spriteNum++;
+            }
+
         } else {
             speed = 3;
-            moveSpeed = 11;
+            moveSpeed = 6;
         }
 
     }
@@ -275,7 +367,7 @@ public class Player extends Entity {
                     case "Door" -> {
                         if (gp.obj[gp.numMap][i].collision) {
                             gp.obj[gp.numMap][i].collision = false;
-                            gp.obj[gp.numMap][i].image = gp.obj[gp.numMap][i].open;
+                            gp.obj[gp.numMap][i].image = gp.obj[gp.numMap][i].alt[1];
                             doorOpen = i;
                             checkMap = gp.numMap;
                         }
@@ -283,13 +375,14 @@ public class Player extends Entity {
                     case "Door2" -> {
                         if (gp.obj[gp.numMap][i].collision) {
                             gp.obj[gp.numMap][i].collision = false;
-                            gp.obj[gp.numMap][i].image = gp.obj[gp.numMap][i].open;
+                            gp.obj[gp.numMap][i].image = gp.obj[gp.numMap][i].alt[1];
                             doorOpen = i;
                             checkMap = gp.numMap;
                         }
                     }
                 }
             }
+            
 
 
         }
@@ -303,12 +396,12 @@ public class Player extends Entity {
                         String objectName = gp.obj[e][j].name;
                         switch(objectName) {
                             case "Door" -> {
-                                gp.obj[e][j].image = gp.obj[e][j].closed;
+                                gp.obj[e][j].image = gp.obj[e][j].alt[0];
                                 gp.obj[e][j].collision = true;
 
                             }
                             case "Door2" -> {
-                                gp.obj[e][j].image = gp.obj[e][j].closed;
+                                gp.obj[e][j].image = gp.obj[e][j].alt[0];
                                 gp.obj[e][j].collision = true;
                                 
                             }
@@ -330,16 +423,25 @@ public class Player extends Entity {
         if (i != 999) {
 
             if (timer == 0) {
-
-
-                if (!gp.obj[checkMap][i].collision) {
-                    gp.obj[checkMap][i].collision = true;
-                    gp.obj[checkMap][i].image = gp.obj[gp.numMap][i].closed;
-                    doorOpen = 999;
+                int xDistance = Math.abs(gp.player.worldX - gp.obj[checkMap][i].worldX);
+                int yDistance = Math.abs(gp.player.worldY - gp.obj[checkMap][i].worldY);
+                int distance = Math.max(xDistance, yDistance);
+                if(distance > gp.tileSize && !closeDoor && !gp.obj[checkMap][i].collision) {
+                    closeDoor = true;
                 }
+
+                System.out.println(closeDoor);
+                //!gp.obj[checkMap][i].collision
+                
 
             timer = 30;
 
+            }
+            if (closeDoor) {
+                gp.obj[checkMap][i].collision = true;
+                gp.obj[checkMap][i].image = gp.obj[gp.numMap][i].alt[0];
+                doorOpen = 999;
+                closeDoor = false;
             }
 
         timer--;
@@ -349,7 +451,7 @@ public class Player extends Entity {
 
 
     public BufferedImage drawMovingAnimation(BufferedImage image) {
-
+        
         if (keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true || keyH.rightPressed == true) {
         
                 switch(direction) {
@@ -360,6 +462,24 @@ public class Player extends Entity {
                         if (spriteNum == 2) {
                             image = up2;
                         }
+                        if (spriteNum == 3) {
+                            image = up1;
+                        }
+                        if (spriteNum == 4) {
+                            image = up3;
+                        }
+                        if (spriteNum == 5) {
+                            image = up4;
+                        }
+                        if (spriteNum == 6) {
+                            image = up5;
+                        }
+                        if (spriteNum == 7) {
+                            image = up4;
+                        }
+                        if (spriteNum == 8) {
+                            image = up3;
+                        }
                         }
                     case "down" -> {
                         if (spriteNum == 1) {
@@ -367,6 +487,24 @@ public class Player extends Entity {
                         }
                         if (spriteNum == 2) {
                             image = down2;
+                        }
+                        if (spriteNum == 3) {
+                            image = down1;
+                        }
+                        if (spriteNum == 4) {
+                            image = down3;
+                        }
+                        if (spriteNum == 5) {
+                            image = down4;
+                        }
+                        if (spriteNum == 6) {
+                            image = down5;
+                        }
+                        if (spriteNum == 7) {
+                            image = down4;
+                        }
+                        if (spriteNum == 8) {
+                            image = down6;
                         }
                         }
                     case "left" -> {
@@ -376,6 +514,24 @@ public class Player extends Entity {
                         if (spriteNum == 2) {
                             image = left2;
                         }
+                        if (spriteNum == 3) {
+                            image = left1;
+                        }
+                        if (spriteNum == 4) {
+                            image = left3;
+                        }
+                        if (spriteNum == 5) {
+                            image = left4;
+                        }
+                        if (spriteNum == 6) {
+                            image = left5;
+                        }
+                        if (spriteNum == 7) {
+                            image = left4;
+                        }
+                        if (spriteNum == 8) {
+                            image = left3;
+                        }
                         }
                     case "right" -> {
                         if (spriteNum == 1) {
@@ -383,6 +539,24 @@ public class Player extends Entity {
                         }
                         if (spriteNum == 2) {
                             image = right2;
+                        }
+                        if (spriteNum == 3) {
+                            image = right1;
+                        }
+                        if (spriteNum == 4) {
+                            image = right3;
+                        }
+                        if (spriteNum == 5) {
+                            image = right4;
+                        }
+                        if (spriteNum == 6) {
+                            image = right5;
+                        }
+                        if (spriteNum == 7) {
+                            image = right4;
+                        }
+                        if (spriteNum == 8) {
+                            image = right3;
                         }
                         }
             
@@ -396,7 +570,7 @@ public class Player extends Entity {
         if (keyH.upPressed == false && keyH.downPressed == false && keyH.leftPressed == false && keyH.rightPressed == false) {
                 switch(direction) {
                     case "up" -> {
-                        if (spriteNumIdle <= 8) {
+                        if (spriteNumIdle <= 6) {
                             image = upIdle1;
                         }
                 }
@@ -414,26 +588,21 @@ public class Player extends Entity {
                             image = idle4;
                         }
                         if (spriteNumIdle == 5) {
-                            image = idle4;
-                        }
-                        if (spriteNumIdle == 6) {
                             image = idle3;
                         }
-                        if (spriteNumIdle == 7) {
+                        if (spriteNumIdle == 6) {
                             image = idle2;
                         }
-                        if (spriteNumIdle == 8) {
-                            image = idle1;
-                        }
+                        
                }
                     case "left" -> {
-                        if (spriteNumIdle <= 8) {
-                            image = left2;
+                        if (spriteNumIdle <= 6) {
+                            image = leftIdle1;
                         }
                }
                     case "right" -> {
-                        if (spriteNumIdle <= 8) {
-                            image = right2;
+                        if (spriteNumIdle <= 6) {
+                            image = rightIdle1;
                         }
                }
             
@@ -454,6 +623,7 @@ public class Player extends Entity {
     
 
 
+    @Override
     public void updateMovingAnimation(int speed) {
         if (keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true || keyH.rightPressed == true) {
             if(keyH.upPressed == true) {
@@ -473,10 +643,17 @@ public class Player extends Entity {
 
             spriteCounter++;
             if (spriteCounter > speed) {
-                if (spriteNum == 1) {
-                    spriteNum = 2;
-                } else if (spriteNum == 2) {
-                    spriteNum = 1;
+                switch (spriteNum) {
+                    case 1 -> spriteNum = 2;
+                    case 2 -> spriteNum = 3;
+                    case 3 -> spriteNum = 4;
+                    case 4 -> spriteNum = 5;
+                    case 5 -> spriteNum = 6;
+                    case 6 -> spriteNum = 7;
+                    case 7 -> spriteNum = 8;
+                    case 8 -> spriteNum = 1;
+                    default -> {
+                    }
                 }
                 spriteCounter = 0;
             }
@@ -485,22 +662,21 @@ public class Player extends Entity {
 
     }
 
+    @Override
     public void updateIdleAnimation() {
 
         if (keyH.upPressed == false || keyH.downPressed == false || keyH.leftPressed == false || keyH.rightPressed == false) {
                 
                 spriteCounterIdle++;
                             
-                if (spriteCounterIdle > 18) {
+                if (spriteCounterIdle > 45) {
                     switch (spriteNumIdle) {
                         case 1 -> spriteNumIdle = 2;
                         case 2 -> spriteNumIdle = 3;
                         case 3 -> spriteNumIdle = 4;
                         case 4 -> spriteNumIdle = 5;
                         case 5 -> spriteNumIdle = 6;
-                        case 6 -> spriteNumIdle = 7;
-                        case 7 -> spriteNumIdle = 8;
-                        case 8 -> spriteNumIdle = 1;
+                        case 6 -> spriteNumIdle = 1;
                         
                     }
                     spriteCounterIdle = 0;
@@ -510,6 +686,7 @@ public class Player extends Entity {
         }
     }
 
+    @Override
     public int collisionDetector() {
         if (keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true || keyH.rightPressed == true) {
 
@@ -532,6 +709,8 @@ public class Player extends Entity {
         }
         return 999;
     }
+
+    
 
 
 

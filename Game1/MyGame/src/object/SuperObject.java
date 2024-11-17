@@ -16,8 +16,11 @@ public class SuperObject {
     public int solidAreaDefaultX = 0;
     public int solidAreaDefaultY = 0;
     UtilityTool uTool = new UtilityTool();
+    public int width = 48;
+    public int height = 48;
 
-    public BufferedImage closed, open;
+    public BufferedImage alt[];
+    //closed, open;
 
 
 
@@ -34,7 +37,7 @@ public class SuperObject {
                 worldY + gp.tileSize > gp.player.worldY - gp.player.screenY &&
                 worldY - gp.tileSize < gp.player.worldY + gp.player.screenY) {
 
-                    g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
+                    g2.drawImage(image, screenX, screenY, width, height, null);
             }
 
     }
