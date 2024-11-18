@@ -1,39 +1,37 @@
 package object;
 
+import entity.Entity;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import javax.imageio.ImageIO;
 import main.GamePanel;
 
 
 
-public class OBJ_Door extends SuperObject{
+public class OBJ_Door extends Entity {
 
-    GamePanel gp;
+
     
     @SuppressWarnings({"UseSpecificCatch", "CallToPrintStackTrace"})
     public OBJ_Door(GamePanel gp) {
 
-        this.gp = gp;
+
+        super(gp);
 
         name = "Door";
 
         alt = new BufferedImage[2];
 
-        try {
+        
 
-            image = ImageIO.read(new File("./res/objects/doorClosed.png"));
-            alt[0] = ImageIO.read(new File("./res/objects/doorClosed.png"));
-            alt[1] = ImageIO.read(new File("./res/objects/doorOpen.png"));
+        alt[0] = setup("./res/objects/doorClosed");
+        alt[1] = setup("./res/objects/doorOpen");
 
-            image = uTool.scaleImage(image, gp.tileSize, gp.tileSize);
-            alt[0] = uTool.scaleImage(alt[0], gp.tileSize, gp.tileSize);
-            alt[1] = uTool.scaleImage(alt[1], gp.tileSize, gp.tileSize);
+        down1 = alt[0];
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        obj = true;
+
+
         collision = true;
+
 
     }
 

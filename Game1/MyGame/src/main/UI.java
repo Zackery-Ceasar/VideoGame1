@@ -8,7 +8,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.imageio.ImageIO;
 import object.OBJ_Health;
-import object.SuperObject;
+import entity.Entity;
 
 public final class UI {
 
@@ -41,7 +41,7 @@ public final class UI {
         idle3 = setup("./res/player/idle3");
         idle4 = setup("./res/player/idle4");
 
-        SuperObject health = new OBJ_Health(gp);
+        Entity health = new OBJ_Health(gp);
         healthBarEnding = health.alt[0];
         healthBar = health.alt[1];
         emptyHealthBar = health.alt[2];

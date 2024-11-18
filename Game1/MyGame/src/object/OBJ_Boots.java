@@ -1,31 +1,28 @@
 package object;
 
-import java.io.File;
-import javax.imageio.ImageIO;
+import entity.Entity;
 import main.GamePanel;
 
-public class OBJ_Boots extends SuperObject {
+public class OBJ_Boots extends Entity {
 
-    GamePanel gp;
+
 
 
     @SuppressWarnings({"UseSpecificCatch", "CallToPrintStackTrace"})
     public OBJ_Boots(GamePanel gp) {
 
-        this.gp = gp;
+        super(gp);
 
         name = "Boots";
 
-        try {
+        width = gp.tileSize/2;
+        height = gp.tileSize/2;
 
-            image = ImageIO.read(new File("./res/objects/boots.png"));
-            image = uTool.scaleImage(image, gp.tileSize, gp.tileSize);
+        down1 = setup("./res/objects/boots");
 
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         collision = false;
+
+        obj = true;
 
     }
 

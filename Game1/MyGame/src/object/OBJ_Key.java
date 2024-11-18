@@ -1,30 +1,25 @@
 package object;
 
-import java.io.File;
-import javax.imageio.ImageIO;
+
+
+import entity.Entity;
 import main.GamePanel;
 
 
 
 
-public class OBJ_Key extends SuperObject{
+public class OBJ_Key extends Entity {
 
-    GamePanel gp;
     
     @SuppressWarnings({"UseSpecificCatch", "CallToPrintStackTrace"})
     public OBJ_Key(GamePanel gp) {
 
-        this.gp = gp;
+        super(gp);
+        
+        obj = true;
         name = "Key";
+        down1 = setup("./res/objects/key");
 
-        try {
-
-            image = ImageIO.read(new File("./res/objects/key.png"));
-            image = uTool.scaleImage(image, gp.tileSize, gp.tileSize);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         
     }
 }

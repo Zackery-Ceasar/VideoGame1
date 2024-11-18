@@ -1,40 +1,31 @@
 package object;
 
+import entity.Entity;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import javax.imageio.ImageIO;
 import main.GamePanel;
 
 
 
-public class OBJ_Chest extends SuperObject{
+public class OBJ_Chest extends Entity {
 
 
-    GamePanel gp;
+
     
     @SuppressWarnings({"UseSpecificCatch", "CallToPrintStackTrace"})
     public OBJ_Chest(GamePanel gp) {
 
-        this.gp = gp;
+        super(gp);
 
         name = "Chest";
 
         alt = new BufferedImage[2];
 
-        try {
+        alt[0] = setup("./res/objects/chestClosed");
+        alt[1] = setup("./res/objects/chestOpen");
 
-            image = ImageIO.read(new File("./res/objects/chestClosed.png"));
-            alt[0] = ImageIO.read(new File("./res/objects/chestClosed.png"));
-            alt[1] = ImageIO.read(new File("./res/objects/chestOpen.png"));
+        down1 = alt[0];
 
-            image = uTool.scaleImage(image, gp.tileSize, gp.tileSize);
-            alt[0] = uTool.scaleImage(alt[0], gp.tileSize, gp.tileSize);
-            alt[1] = uTool.scaleImage(alt[1], gp.tileSize, gp.tileSize);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        
+        obj = true;
         collision = true;
 
     }

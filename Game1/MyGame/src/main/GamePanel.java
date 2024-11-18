@@ -7,9 +7,11 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import javax.swing.JPanel;
 import messages.MessageManager;
-import object.SuperObject;
 import tile.MapManager;
 import tile.RandomAnimation;
 import tile.TileManager;
@@ -63,8 +65,12 @@ public class GamePanel extends JPanel implements Runnable {
     public UI ui = new UI(this);
     public EventHandler eHandler = new EventHandler(this);
     
-    public SuperObject obj[][] = new SuperObject[tileM.numMaps][objectQTY];
+    public Entity obj[][] = new Entity[tileM.numMaps][objectQTY];
     public Entity npc[][] = new Entity[tileM.numMaps][NPCQTY];
+    public Entity monster[][] = new Entity[tileM.numMaps][50];
+
+    ArrayList<Entity> entityList0 = new ArrayList<>();
+    ArrayList<Entity> entityList1 = new ArrayList<>();
 
     // GAME STATE
 
@@ -86,6 +92,7 @@ public class GamePanel extends JPanel implements Runnable {
     public void setupGame() {
         aSetter.setObject();
         aSetter.setNPC();
+        aSetter.setMonster();
         gameState = titleState;
     }
 
@@ -142,6 +149,12 @@ public class GamePanel extends JPanel implements Runnable {
                 }
             }
 
+            for (int i = 0; i < monster[0].length; i++) {
+                if(monster[numMap][i] != null) {
+                    monster[numMap][i].update();
+                }
+            }
+
 
             //ENVIRONMENT
             aSetter.objectAnimations();
@@ -192,11 +205,135 @@ public class GamePanel extends JPanel implements Runnable {
 
             numMap = mapM.checkLocation();
             tileM.draw(g2, numMap);
+            rAnimate.animateRandom(g2, numMap);
+            treeM.drawBehind(g2, numMap, 0);
+
+
+            // ADDED ENTITIES TO LIST
+
+            
+            
+
+            if (numMap == 0) {
+
+                entityList0.add(player);
+                for(int i = 0; i < npc[0].length; i++) {
+                    if(npc[0][i] != null) {
+                        entityList0.add(npc[0][i]);
+                    }
+                }
+                //System.out.println("npc length " + npc[0].length);
+
+
+                for(int i = 0; i < obj[0].length; i++) {
+                    if(obj[0][i] != null) {
+                        entityList0.add(obj[0][i]);
+                    }
+                }
+                //System.out.println("obj length " + obj[0].length);
+
+                for(int i = 0; i < monster[0].length; i++) {
+                    if(monster[0][i] != null) {
+                        entityList0.add(monster[0][i]);
+                    }
+                }
+
+                Collections.sort(entityList0, new Comparator<Entity>() {
+                    @Override
+                    public int compare(Entity e1, Entity e2) {
+                        int result = Integer.compare(e1.worldY, e2.worldY);
+                        return result;
+                    }
+
+
+                });
+
+
+                // DRAW
+
+                //System.out.println(entityList0.size());
+                for(int i = 0; i < entityList0.size(); i++) {
+                    //System.out.println(entityList0.get(i));
+                    entityList0.get(i).draw(g2);
+                }
+
+
+                //EMPTY
+                for(int i = 0; i < entityList0.size(); i++) {
+                    entityList0.remove(i);
+                }
+
+
+
+            } else if (numMap == 1) {
+
+                entityList1.add(player);
+
+                //System.out.println(entityList1.size());
+                for(int i = 0; i < npc[0].length; i++) {
+                    if(npc[1][i] != null) {
+                        entityList1.add(npc[1][i]);
+                    }
+                }
+
+
+                for(int i = 0; i < obj[0].length; i++) {
+                    if(obj[1][i] != null) {
+                        entityList1.add(obj[1][i]);
+                    }
+                }
+
+                for(int i = 0; i < monster[0].length; i++) {
+                    if(monster[1][i] != null) {
+                        entityList1.add(monster[1][i]);
+                    }
+                }
+
+
+                Collections.sort(entityList1, new Comparator<Entity>() {
+                    @Override
+                    public int compare(Entity e1, Entity e2) {
+                        int result = Integer.compare(e1.worldY, e2.worldY);
+                        return result;
+                    }
+
+                    
+
+
+
+                });
+
+                // DRAW
+                    
+                for(int i = 0; i < entityList1.size(); i++) {
+                    entityList1.get(i).draw(g2);
+                }
+
+                //EMPTY
+                for(int i = 0; i < entityList1.size(); i++) {
+                    entityList1.remove(i);
+                }
+
+
+            }
+
 
             
 
-            treeM.drawBehind(g2, numMap, 0);
+            
+            //obj[0][3].draw(g2);
+            //g2.drawImage(obj[0][3].down1, player.screenX, player.screenY, null);
+            
 
+
+            /* 
+
+            //Object
+            for (int i = 0; i < objectQTY; i++) {
+                if (obj[numMap][i] != null) {
+                    obj[numMap][i].drawBehind(g2);
+                }
+            }
 
             //NPC BEHIND
             for (int i = 0; i < NPCQTY; i++) {
@@ -205,27 +342,8 @@ public class GamePanel extends JPanel implements Runnable {
                 }
             }
 
-
-
-
-            rAnimate.animateRandom(g2, numMap);
-
-            //Object
-            for (int i = 0; i < objectQTY; i++) {
-                if (obj[numMap][i] != null) {
-                    obj[numMap][i].draw(g2, this);
-                }
-            }
-
-            
-
-            
-            
-
             // player
             player.draw(g2);
-
-        
 
             //NPC FRONT
             for (int i = 0; i < NPCQTY; i++) {
@@ -234,10 +352,18 @@ public class GamePanel extends JPanel implements Runnable {
                 }
             }
 
+            //Object
+            for (int i = 0; i < objectQTY; i++) {
+                if (obj[numMap][i] != null) {
+                    obj[numMap][i].drawFront(g2);
+                }
+            }
+
+            */
+
+
 
             treeM.drawFront(g2, numMap, 0);
-
-
             ui.draw(g2);
             mManager.sendMessage(g2);
 
@@ -266,7 +392,6 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
         
-
 
 
 

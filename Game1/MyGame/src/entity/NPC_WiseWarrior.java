@@ -21,7 +21,7 @@ public class NPC_WiseWarrior extends Entity{
 
         solidArea = new Rectangle();
         solidArea.x = 12;
-        solidArea.y = 24;
+        solidArea.y = 26;
         solidAreaDefaultX = solidArea.x;
         solidAreaDefaultY = solidArea.y;
         solidArea.width = 24;
@@ -124,7 +124,7 @@ public class NPC_WiseWarrior extends Entity{
    
 
     @Override
-    public void drawFront(Graphics2D g2) {
+    public void draw(Graphics2D g2) {
 
 
         int screenX = worldX - gp.player.worldX + gp.player.screenX;
@@ -137,8 +137,7 @@ public class NPC_WiseWarrior extends Entity{
         if (worldX + gp.tileSize > gp.player.worldX - gp.player.screenX &&
             worldX - gp.tileSize < gp.player.worldX + gp.player.screenX &&
             worldY + gp.tileSize > gp.player.worldY - gp.player.screenY &&
-            worldY - gp.tileSize < gp.player.worldY + gp.player.screenY && 
-            gp.player.worldY < worldY) {
+            worldY - gp.tileSize < gp.player.worldY + gp.player.screenY ) {
 
                 if (!idle) {
                     image = drawMovingAnimation();
@@ -153,37 +152,7 @@ public class NPC_WiseWarrior extends Entity{
     
     }
 
-    @Override
-    public void drawBehind(Graphics2D g2) {
-
-
-        int screenX = worldX - gp.player.worldX + gp.player.screenX;
-        int screenY = worldY - gp.player.worldY + gp.player.screenY;
-
-        BufferedImage image;
-        
-            
-
-        if (worldX + gp.tileSize > gp.player.worldX - gp.player.screenX &&
-            worldX - gp.tileSize < gp.player.worldX + gp.player.screenX &&
-            worldY + gp.tileSize > gp.player.worldY - gp.player.screenY &&
-            worldY - gp.tileSize < gp.player.worldY + gp.player.screenY && 
-            gp.player.worldY >= worldY) {
-
-                if (!idle) {
-                    image = drawMovingAnimation();
-                } else {
-                    image = drawIdleAnimation();
-                }
-                
-                g2.setColor(new Color(0, 0, 0, 65));
-                g2.fillOval(screenX + 4, screenY + gp.tileSize, gp.tileSize *4/5, gp.tileSize/3);
-                
-                g2.drawImage(image, screenX, screenY, width, height, null);
-        }
-
     
-    }
 
         
 

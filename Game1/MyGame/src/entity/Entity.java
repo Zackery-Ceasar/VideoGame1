@@ -11,7 +11,8 @@ import main.UtilityTool;
 public class Entity {
     public int worldX, worldY;
     public int speed;
-    public String direction;
+    public int animationSpeed = 6;
+    public String direction = "down";
 
     public int width, height;
 
@@ -38,16 +39,31 @@ public class Entity {
     public int dialogueIndex = 0;
 
 
-    GamePanel gp;
+    public GamePanel gp;
 
+    //OBJ TRANSFER
+    public BufferedImage image;
+    public String name;
+    public boolean collision = false;
+    public BufferedImage alt[];
 
+    //INVINCIBILITY
+
+    public boolean invincible = false;
+    public int invincibleCounter = 0;
+
+    public int type;
+    
     
     
     public Rectangle solidArea;
-    public int solidAreaDefaultX, solidAreaDefaultY;
+    public int solidAreaDefaultX;
+    public int solidAreaDefaultY;
+
     public boolean collisionOn = false;
     public int actionLockCounter;
-    public boolean idle;
+    public boolean idle = true;
+    public boolean obj = false;
     public String dialogues[] = new String[20];
 
     // STATUS
@@ -57,13 +73,24 @@ public class Entity {
 
     public Entity(GamePanel gp) {
         this.gp = gp;
+
+        solidArea = new Rectangle(0, 0, gp.tileSize, gp.tileSize);
+        solidAreaDefaultX = solidArea.x;
+        solidAreaDefaultY= solidArea.y;
+
+        alt = new BufferedImage[10];
+        height = gp.tileSize;
+        width = gp.tileSize;
+
+
+
     }
 
 
 
 
 
-    public void drawFront(Graphics2D g2) {
+    public void draw(Graphics2D g2) {
 
 
         int screenX = worldX - gp.player.worldX + gp.player.screenX;
@@ -76,49 +103,28 @@ public class Entity {
         if (worldX + gp.tileSize > gp.player.worldX - gp.player.screenX &&
             worldX - gp.tileSize < gp.player.worldX + gp.player.screenX &&
             worldY + gp.tileSize > gp.player.worldY - gp.player.screenY &&
-            worldY - gp.tileSize < gp.player.worldY + gp.player.screenY && 
-            gp.player.worldY < worldY) {
+            worldY - gp.tileSize < gp.player.worldY + gp.player.screenY) {
                  
+                if (obj) { 
+                    image = down1;
+                } else {
                     if (!idle) {
                         image = drawMovingAnimation();
                     } else {
                         image = drawIdleAnimation();
                     }
                 
-                g2.drawImage(image, screenX, screenY, width, height, null);
-        }
-
-    
-    }
-
-    public void drawBehind(Graphics2D g2) {
-
-
-        int screenX = worldX - gp.player.worldX + gp.player.screenX;
-        int screenY = worldY - gp.player.worldY + gp.player.screenY;
-
-        BufferedImage image;
-        
-            
-
-        if (worldX + gp.tileSize > gp.player.worldX - gp.player.screenX &&
-            worldX - gp.tileSize < gp.player.worldX + gp.player.screenX &&
-            worldY + gp.tileSize > gp.player.worldY - gp.player.screenY &&
-            worldY - gp.tileSize < gp.player.worldY + gp.player.screenY && 
-            gp.player.worldY >= worldY) {
-
-                if (!idle) {
-                    image = drawMovingAnimation();
-                } else {
-                    image = drawIdleAnimation();
                 }
                 
-                
+
+
                 g2.drawImage(image, screenX, screenY, width, height, null);
         }
 
     
     }
+
+    
 
     public void setAction() {}
     public void speak() {
@@ -156,7 +162,7 @@ public class Entity {
 
         if (!idle) {
             collisionDetector();
-            updateMovingAnimation(6);
+            updateMovingAnimation();
         } else {
             updateIdleAnimation();
         }
@@ -188,6 +194,22 @@ public class Entity {
         try {
             image = ImageIO.read(new File(imagePath + ".png"));
             image = uTool.scaleImage(image, gp.tileSize, gp.tileSize);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return image;
+
+    }
+
+    @SuppressWarnings({"UseSpecificCatch", "CallToPrintStackTrace"})
+    public BufferedImage setup(String imagePath, int width, int height) {
+        UtilityTool uTool = new UtilityTool();
+        BufferedImage image = null;
+
+        try {
+            image = ImageIO.read(new File(imagePath + ".png"));
+            image = uTool.scaleImage(image, width, height);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -314,13 +336,13 @@ public class Entity {
         return image;
     }
 
-    public void updateMovingAnimation(int speed) {
+    public void updateMovingAnimation() {
             //if (keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true || keyH.rightPressed == true) {
                 
 
 
                 spriteCounter++;
-                if (spriteCounter > speed) {
+                if (spriteCounter > animationSpeed) {
                     switch (spriteNum) {
                         case 1 -> spriteNum = 2;
                         case 2 -> spriteNum = 3;
@@ -345,8 +367,17 @@ public class Entity {
 
 
             gp.cChecker.checkTile(this, gp.numMap);
-            int i = gp.cChecker.checkObject(this);
-            gp.cChecker.checkPlayer(this);
+            gp.cChecker.checkObject(this, gp.obj);
+            gp.cChecker.checkEntity(this, gp.npc);
+            gp.cChecker.checkEntity(this, gp.monster);
+            boolean contactPlayer = gp.cChecker.checkPlayer(this);
+
+            if(this.type == 2 && contactPlayer) {
+                if(!gp.player.invincible) {
+                    gp.player.life--;
+                    gp.player.invincible = true;
+                }
+            }
             
 
             if(collisionOn == false) {
@@ -359,8 +390,9 @@ public class Entity {
                         
                 }
             }
-            return 999;
         //}
+
+        return 999;
         
     }
 
@@ -417,7 +449,7 @@ public class Entity {
                 
             spriteCounterIdle++;
                             
-            if (spriteCounterIdle > 45) {
+            if (spriteCounterIdle > animationSpeed) {
                 switch (spriteNumIdle) {
                     case 1 -> spriteNumIdle = 2;
                     case 2 -> spriteNumIdle = 3;

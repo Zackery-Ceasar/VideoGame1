@@ -1,5 +1,6 @@
 package entity;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -53,7 +54,7 @@ public class Player extends Entity {
 
         solidArea = new Rectangle();
         solidArea.x = 12;
-        solidArea.y = 24;
+        solidArea.y = 26;
         solidAreaDefaultX = solidArea.x;
         solidAreaDefaultY = solidArea.y;
         solidArea.width = 24;
@@ -183,9 +184,9 @@ public class Player extends Entity {
 
         // animations
 
-        sprint();
+        
 
-        updateMovingAnimation(moveSpeed);
+        updateMovingAnimation();
         updateIdleAnimation();
 
         image = drawMovingAnimation(image);
@@ -199,22 +200,46 @@ public class Player extends Entity {
         int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
         interactNPC(npcIndex);
 
+        //CHECK MONSTERS
+
+        int monsterIndex = gp.cChecker.checkEntity(this, gp.monster);
+        monsterContact(monsterIndex);
+
+
         //EVENTS 
         gp.eHandler.checkEvent();
 
         objIndex = collisionDetector(); 
-        
 
-        // Checks key and chest objects
-        keyUpdate(objIndex);
-        chestOpen();
+
+
+        if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed || keyH.enterPressed) {
+                    // Checks key and chest objects
+            keyUpdate(objIndex);
+            chestOpen();
 
         // Items
 
-        bootsUpdate(objIndex);
+            sprint();
 
         // Door functions
-        doorUpdateOpen(objIndex);
+            doorUpdateOpen(objIndex);
+        }
+        
+
+        if(invincible) {
+            invincibleCounter++;
+            if(invincibleCounter > 60) {
+                invincible = false;
+                invincibleCounter = 0;
+            }
+        }
+
+
+
+
+        bootsUpdate(objIndex);
+
         doorUpdateClose(doorOpen);
 
         closeAllDoorsWhenSwitched();
@@ -224,9 +249,22 @@ public class Player extends Entity {
     
     public void draw(Graphics2D g2) {
 
-        g2.setColor(new Color(0, 0, 0, 65));
-        g2.fillOval(screenX + 4, screenY + gp.tileSize-5, gp.tileSize *4/5, gp.tileSize/3);
+        if (gp.numMap == 0) {
+            g2.setColor(new Color(0, 0, 0, 65));
+            g2.fillOval(screenX + 4, screenY + gp.tileSize-5, gp.tileSize *4/5, gp.tileSize/3);
+        }
+
+        if(invincible) {
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5F));
+        }
+
         g2.drawImage(image, screenX, screenY, width, height, null);
+
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1F));
+        
+        //g2.setFont(new Font("Arial", Font.BOLD, 26));
+        ///g2.setColor(Color.white);
+        //g2.drawString("Invincible: "+invincibleCounter, 10, 400);
         
 
     }
@@ -266,7 +304,16 @@ public class Player extends Entity {
 
     }
 
+    public void monsterContact(int i) {
+        if(i != 999) {
 
+            if (!invincible) {
+                life--;
+                invincible = true;
+            }
+            
+        }
+    }
 
 
 
@@ -287,8 +334,8 @@ public class Player extends Entity {
                         gp.obj[gp.numMap][i] = null;
                     }
                     case "Chest" -> {
-                        if(hasKey > 0) {
-                            gp.obj[gp.numMap][i].image = gp.obj[gp.numMap][i].alt[1];
+                        if(hasKey > 0 && keyH.enterPressed) {
+                            gp.obj[gp.numMap][i].down1 = gp.obj[gp.numMap][i].alt[1];
                             hasKey--;
                             chestOpen = true;
                         } 
@@ -325,23 +372,18 @@ public class Player extends Entity {
         }
     }
 
-
+    ////////////////////////////////////////////////////////////////
 
 
     public void sprint() {
         if (hasBoots && keyH.shiftPressed == true) {
-            moveSpeed = 9;
+            animationSpeed = 5;
             speed = 4;
 
-            if (spriteNum == 3) {
-                spriteNum++;
-            } else if (spriteNum == 7) {
-                spriteNum++;
-            }
 
         } else {
-            speed = 3;
-            moveSpeed = 6;
+            speed = 3;   // WAS 3
+            animationSpeed = 6;
         }
 
     }
@@ -367,7 +409,8 @@ public class Player extends Entity {
                     case "Door" -> {
                         if (gp.obj[gp.numMap][i].collision) {
                             gp.obj[gp.numMap][i].collision = false;
-                            gp.obj[gp.numMap][i].image = gp.obj[gp.numMap][i].alt[1];
+                            
+                            gp.obj[gp.numMap][i].down1 = gp.obj[gp.numMap][i].alt[1];
                             doorOpen = i;
                             checkMap = gp.numMap;
                         }
@@ -375,7 +418,8 @@ public class Player extends Entity {
                     case "Door2" -> {
                         if (gp.obj[gp.numMap][i].collision) {
                             gp.obj[gp.numMap][i].collision = false;
-                            gp.obj[gp.numMap][i].image = gp.obj[gp.numMap][i].alt[1];
+                            //System.out.println("Collision on: " + gp.obj[gp.numMap][i].collision);
+                            gp.obj[gp.numMap][i].down1 = gp.obj[gp.numMap][i].alt[1];
                             doorOpen = i;
                             checkMap = gp.numMap;
                         }
@@ -396,12 +440,12 @@ public class Player extends Entity {
                         String objectName = gp.obj[e][j].name;
                         switch(objectName) {
                             case "Door" -> {
-                                gp.obj[e][j].image = gp.obj[e][j].alt[0];
+                                gp.obj[e][j].down1 = gp.obj[e][j].alt[0];
                                 gp.obj[e][j].collision = true;
 
                             }
                             case "Door2" -> {
-                                gp.obj[e][j].image = gp.obj[e][j].alt[0];
+                                gp.obj[e][j].down1 = gp.obj[e][j].alt[0];
                                 gp.obj[e][j].collision = true;
                                 
                             }
@@ -430,7 +474,7 @@ public class Player extends Entity {
                     closeDoor = true;
                 }
 
-                System.out.println(closeDoor);
+                //System.out.println("Close door: " + closeDoor);
                 //!gp.obj[checkMap][i].collision
                 
 
@@ -439,7 +483,7 @@ public class Player extends Entity {
             }
             if (closeDoor) {
                 gp.obj[checkMap][i].collision = true;
-                gp.obj[checkMap][i].image = gp.obj[gp.numMap][i].alt[0];
+                gp.obj[checkMap][i].down1 = gp.obj[gp.numMap][i].alt[0];
                 doorOpen = 999;
                 closeDoor = false;
             }
@@ -624,7 +668,7 @@ public class Player extends Entity {
 
 
     @Override
-    public void updateMovingAnimation(int speed) {
+    public void updateMovingAnimation() {
         if (keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true || keyH.rightPressed == true) {
             if(keyH.upPressed == true) {
                 direction = "up";
@@ -642,7 +686,7 @@ public class Player extends Entity {
 
 
             spriteCounter++;
-            if (spriteCounter > speed) {
+            if (spriteCounter > animationSpeed) {
                 switch (spriteNum) {
                     case 1 -> spriteNum = 2;
                     case 2 -> spriteNum = 3;
@@ -686,13 +730,13 @@ public class Player extends Entity {
         }
     }
 
-    @Override
     public int collisionDetector() {
         if (keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true || keyH.rightPressed == true) {
 
 
             gp.cChecker.checkTile(this, gp.numMap);
-            int i = gp.cChecker.checkObject(this, true);
+            int i = gp.cChecker.checkObject(this, gp.obj);
+            //int i = gp.cChecker.checkEntity(this, gp.obj);
             
 
             if(collisionOn == false) {
