@@ -185,14 +185,13 @@ public class KeyHandler implements KeyListener {
             rightPressed = false;
        }
        if(code == KeyEvent.VK_SHIFT) {
-          shiftPressed = false;
+            shiftPressed = false;
        }
 
 
-          if(code == KeyEvent.VK_ENTER) {
-                    
-               enterPressed = false;
-          }
+     if(code == KeyEvent.VK_ENTER) {
+           enterPressed = false;
+     }
 
 
 

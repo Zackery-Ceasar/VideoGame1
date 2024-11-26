@@ -20,7 +20,8 @@ public class MON_Skriller extends Entity {
         width = gp.tileSize + gp.tileSize/4;
         height = gp.tileSize + gp.tileSize/12;
         // 60 width 52 height
-
+        
+        //solidArea = new Rectangle();
         solidArea.x = 15;
         solidArea.y = 18;
         solidArea.width = 30;
@@ -70,23 +71,38 @@ public class MON_Skriller extends Entity {
 
         actionLockCounter++;
 
+        int i = 1;
         if(actionLockCounter == 120) {
             Random random = new Random();
-            int i = random.nextInt(150) + 1;  // pick up a number from 1 to 100
+            String prevDirection = direction;
+            i = random.nextInt(150) + 1;  // pick up a number from 1 to 100
 
             if (i <= 25) {
                 direction = "up";
+                up = true;
+            } else {
+                up = false;
             }
             if (i > 25 && i <= 50) {
                 direction = "down";
+                down = true;
+            } else {
+                down = false;
             }
             if (i > 50 && i <= 75) {
                 direction = "left";
+                left = true;
+            } else {
+                left = false;
             }
             if (i > 75 && i <= 100) {
                 direction = "right";
+                right = true;
+            } else {
+                right = false;
             }
             if (i > 100 && i <= 150) {
+                direction = prevDirection;
                 idle = !idle;
                 
             }

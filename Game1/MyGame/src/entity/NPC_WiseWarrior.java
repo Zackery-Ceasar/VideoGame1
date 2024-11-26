@@ -1,15 +1,14 @@
 package entity;
 
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
 import java.util.Random;
 import main.GamePanel;
 
 
 public class NPC_WiseWarrior extends Entity{
+    
 
     public NPC_WiseWarrior(GamePanel gp) {
 
@@ -26,6 +25,7 @@ public class NPC_WiseWarrior extends Entity{
         solidAreaDefaultY = solidArea.y;
         solidArea.width = 24;
         solidArea.height = 24;
+        
 
         getImage();
         setDialogue();
@@ -86,26 +86,74 @@ public class NPC_WiseWarrior extends Entity{
 
     @Override
     public void setAction() {
+        //System.out.println(collisionOn);
 
         actionLockCounter++;
 
+        
+       
+        int i = 1;
         if(actionLockCounter == 120) {
             Random random = new Random();
-            int i = random.nextInt(150) + 1;  // pick up a number from 1 to 100
+            prevDirection = direction;
+            
+            i = random.nextInt(150) + 1;  // pick up a number from 1 to 100
+            //System.out.println(i);
+
+
 
             if (i <= 25) {
                 direction = "up";
+                up = true;
+            } else {
+                up = false;
             }
+
             if (i > 25 && i <= 50) {
                 direction = "down";
+                down = true;
+            } else {
+                down = false;
             }
+
             if (i > 50 && i <= 75) {
                 direction = "left";
+                left = true;
+            } else {
+                left = false;
             }
+
             if (i > 75 && i <= 100) {
                 direction = "right";
+                right = true;
+            } else {
+                right = false;
             }
+
             if (i > 100 && i <= 150) {
+                direction = prevDirection;
+                if ("up".equals(prevDirection)) {
+                    up = true;
+                    down = false;
+                    left = false;
+                    right = false;
+                } else if ("down".equals(prevDirection)) {
+                    up = false;
+                    down = true;
+                    left = false;
+                    right = false;
+                } else if ("left".equals(prevDirection)) {
+                    up = false;
+                    down = false;
+                    left = true;
+                    right = false;
+                } else if ("right".equals(prevDirection)) {
+                    up = false;
+                    down = false;
+                    left = false;
+                    right = true;
+                }
+                
                 idle = !idle;
                 
             }
@@ -117,7 +165,37 @@ public class NPC_WiseWarrior extends Entity{
 
     @Override
     public void speak() {
-        super.speak();
+
+        if (dialogues[dialogueIndex] == null) {
+            dialogueIndex = 5;
+        }
+
+        gp.ui.currentDialogue = dialogues[dialogueIndex];
+
+        //dialogueIndex++;
+
+        //if (gp.keyH.enterPressed) {
+
+
+            if (gp.player.up) {
+                //gp.player.worldY += 5;
+                direction = "down";
+                down = true;
+            } else if (gp.player.down) {
+                //gp.player.worldY -= 5;
+                direction = "up";
+                up = true;
+            } else if (gp.player.left) {
+                //gp.player.worldX += 5;
+                direction = "right";
+                right = true;
+            } else if (gp.player.right) {
+                //gp.player.worldX -= 5;
+                direction = "left";
+                left = true;
+            }
+        //}
+        
         
     }
 
@@ -129,23 +207,20 @@ public class NPC_WiseWarrior extends Entity{
 
         int screenX = worldX - gp.player.worldX + gp.player.screenX;
         int screenY = worldY - gp.player.worldY + gp.player.screenY;
-
-        BufferedImage image;
         
             
 
-        if (worldX + gp.tileSize > gp.player.worldX - gp.player.screenX &&
-            worldX - gp.tileSize < gp.player.worldX + gp.player.screenX &&
-            worldY + gp.tileSize > gp.player.worldY - gp.player.screenY &&
-            worldY - gp.tileSize < gp.player.worldY + gp.player.screenY ) {
+        if (worldX + 2*gp.tileSize > gp.player.worldX - gp.player.screenX &&
+            worldX - 2*gp.tileSize < gp.player.worldX + gp.player.screenX &&
+            worldY + 2*gp.tileSize > gp.player.worldY - gp.player.screenY &&
+            worldY - 2*gp.tileSize < gp.player.worldY + gp.player.screenY ) {
 
                 if (!idle) {
                     image = drawMovingAnimation();
                 } else {
                     image = drawIdleAnimation();
                 }
-                g2.setColor(new Color(0, 0, 0, 65));
-                g2.fillOval(screenX + 4, screenY + gp.tileSize, gp.tileSize *4/5, gp.tileSize/3);
+
                 g2.drawImage(image, screenX, screenY, width, height, null);
         }
 

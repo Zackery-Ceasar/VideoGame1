@@ -41,7 +41,7 @@ public class MapManager {
 
         for (int i = 0; i < switchMap.length; i++) {
 
-            int entityLeftWorldX = gp.player.worldX + gp.player.solidArea.x;
+                int entityLeftWorldX = gp.player.worldX + gp.player.solidArea.x;
                 int entityRightWorldX = gp.player.worldX + gp.player.solidArea.x + gp.player.solidArea.width;
                 int entityTopWorldY = gp.player.worldY + gp.player.solidArea.y;
                 int entityBottomWorldY = gp.player.worldY + gp.player.solidArea.y + gp.player.solidArea.height;
@@ -53,56 +53,34 @@ public class MapManager {
 
                 
 
-                switch(gp.player.direction) {
-                case "up" -> {
-                    entityTopRow = (entityTopWorldY - gp.player.speed)/gp.tileSize;
-                    if(entityTopRow == switchRow[i] && (entityLeftCol == switchCol[i] || entityRightCol == switchCol[i]) && switchMap[i] == gp.numMap) {
-                        gp.player.worldX = switchPosXTo[i]*gp.tileSize;
-                        gp.player.worldY = switchPosYTo[i]*gp.tileSize; 
 
-                        gp.player.switchScreen = true;
-
-
-                        return switchMapTo[i];
+                    if (gp.player.up) {
+                        entityTopRow = (entityTopWorldY - gp.player.speed)/gp.tileSize;
                     }
-                }
-                case "down" -> {
-                    entityBottomRow = (entityBottomWorldY + gp.player.speed)/gp.tileSize;
-                    if(entityBottomRow == switchRow[i] && (entityLeftCol == switchCol[i] || entityRightCol == switchCol[i]) && switchMap[i] == gp.numMap) {
-                        gp.player.worldX = switchPosXTo[i]*gp.tileSize;
-                        gp.player.worldY = switchPosYTo[i]*gp.tileSize; 
-
-                        gp.player.switchScreen = true;
-
-
-                        return switchMapTo[i];                
+                    if (gp.player.down) {
+                        entityBottomRow = (entityBottomWorldY + gp.player.speed)/gp.tileSize;
                     }
-                }
-                case "left" -> {
-                    entityRightCol = (entityLeftWorldX - gp.player.speed)/gp.tileSize;
-                    if((entityTopRow == switchRow[i] || entityBottomRow == switchRow[i]) && entityRightCol == switchCol[i] && switchMap[i] == gp.numMap) {
-                        gp.player.worldX = switchPosXTo[i]*gp.tileSize;
-                        gp.player.worldY = switchPosYTo[i]*gp.tileSize; 
-
-                        gp.player.switchScreen = true;
-
-
-                        return switchMapTo[i];                
+                    if (gp.player.left) {
+                        entityLeftCol = (entityLeftWorldX - gp.player.speed)/gp.tileSize;
                     }
-                }
-                case "right" -> {
-                    entityLeftCol = (entityRightWorldX + gp.player.speed)/gp.tileSize;
-                    if((entityTopRow == switchRow[i] || entityBottomRow == switchRow[i]) && entityLeftCol == switchCol[i] && switchMap[i] == gp.numMap) {
-                        gp.player.worldX = switchPosXTo[i]*gp.tileSize;
-                        gp.player.worldY = switchPosYTo[i]*gp.tileSize; 
-
-                        gp.player.switchScreen = true;
-
-
-                        return switchMapTo[i];                
+                    if (gp.player.right) {
+                        entityRightCol = (entityRightWorldX + gp.player.speed)/gp.tileSize;
                     }
+                
+
+                if((entityTopRow == switchRow[i] || entityBottomRow == switchRow[i]) && entityLeftCol == switchCol[i] && switchMap[i] == gp.numMap) {
+                    gp.player.worldX = switchPosXTo[i]*gp.tileSize;
+                    gp.player.worldY = switchPosYTo[i]*gp.tileSize; 
+
+                    gp.player.switchScreen = true;
+
+
+                    return switchMapTo[i];                
                 }
-                }
+
+
+
+                
         }
 
         return gp.numMap;

@@ -18,6 +18,16 @@ public class OBJ_Chest extends Entity {
 
         name = "Chest";
 
+        //solidArea = new Rectangle();
+
+        solidArea.x = 10;
+        solidArea.y = 12;
+        solidArea.width = 28;
+        solidArea.height = 24;
+        solidAreaDefaultX = solidArea.x;
+        solidAreaDefaultY = solidArea.y;
+        
+
         alt = new BufferedImage[2];
 
         alt[0] = setup("./res/objects/chestClosed");

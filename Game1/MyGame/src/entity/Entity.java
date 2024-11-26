@@ -12,7 +12,9 @@ public class Entity {
     public int worldX, worldY;
     public int speed;
     public int animationSpeed = 6;
+    public boolean up = false, down = true, left = false, right = false;
     public String direction = "down";
+    public String prevDirection;
 
     public int width, height;
 
@@ -60,7 +62,12 @@ public class Entity {
     public int solidAreaDefaultX;
     public int solidAreaDefaultY;
 
-    public boolean collisionOn = false;
+    //public boolean collisionOn = false;
+    public boolean collisionUp, collisionDown, collisionLeft, collisionRight;
+
+
+
+
     public int actionLockCounter;
     public boolean idle = true;
     public boolean obj = false;
@@ -95,15 +102,13 @@ public class Entity {
 
         int screenX = worldX - gp.player.worldX + gp.player.screenX;
         int screenY = worldY - gp.player.worldY + gp.player.screenY;
-
-        BufferedImage image;
         
             
 
-        if (worldX + gp.tileSize > gp.player.worldX - gp.player.screenX &&
-            worldX - gp.tileSize < gp.player.worldX + gp.player.screenX &&
-            worldY + gp.tileSize > gp.player.worldY - gp.player.screenY &&
-            worldY - gp.tileSize < gp.player.worldY + gp.player.screenY) {
+        if (worldX + 6*gp.tileSize > gp.player.worldX - gp.player.screenX &&
+            worldX - 6*gp.tileSize < gp.player.worldX + gp.player.screenX &&
+            worldY + 6*gp.tileSize > gp.player.worldY - gp.player.screenY &&
+            worldY - 6*gp.tileSize < gp.player.worldY + gp.player.screenY) {
                  
                 if (obj) { 
                     image = down1;
@@ -126,6 +131,8 @@ public class Entity {
 
     
 
+    
+
     public void setAction() {}
     public void speak() {
         if (dialogues[dialogueIndex] == null) {
@@ -137,18 +144,26 @@ public class Entity {
         //dialogueIndex++;
 
         if (gp.keyH.enterPressed) {
-            if ("up".equals(gp.player.direction)) {
+
+
+            if (gp.player.up) {
                 gp.player.worldY += 5;
                 direction = "down";
-            } else if ("down".equals(gp.player.direction)) {
-                gp.player.worldY -= 5;
+                down = true;
+                
+
+            } else if (gp.player.down) {
+                //gp.player.worldY -= 5;
                 direction = "up";
-            } else if ("left".equals(gp.player.direction)) {
-                gp.player.worldX += 5;
+                up = true;
+            } else if (gp.player.left) {
+                //gp.player.worldX += 5;
                 direction = "right";
+                right = true;
             } else {
-                gp.player.worldX -= 5;
+                //gp.player.worldX -= 5;
                 direction = "left";
+                left = true;
             }
         }
         
@@ -158,7 +173,13 @@ public class Entity {
 
         setAction();
 
-        collisionOn = false;
+        collisionUp = false;
+        collisionDown = false;
+        collisionLeft = false;
+        collisionRight = false;
+        
+
+        //collisionOn = false;
 
         if (!idle) {
             collisionDetector();
@@ -167,7 +188,7 @@ public class Entity {
             updateIdleAnimation();
         }
 
-        
+
 
         
 
@@ -224,114 +245,111 @@ public class Entity {
         //if (keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true || keyH.rightPressed == true) {
         BufferedImage image = null;
 
-                switch(direction) {
-                    case "up" -> {
-                        if (spriteNum == 1) {
-                            image = up1;
-                        }
-                        if (spriteNum == 2) {
-                            image = up2;
-                        }
-                        if (spriteNum == 3) {
-                            image = up1;
-                        }
-                        if (spriteNum == 4) {
-                            image = up3;
-                        }
-                        if (spriteNum == 5) {
-                            image = up4;
-                        }
-                        if (spriteNum == 6) {
-                            image = up5;
-                        }
-                        if (spriteNum == 7) {
-                            image = up4;
-                        }
-                        if (spriteNum == 8) {
-                            image = up3;
-                        }
-                        }
-                    case "down" -> {
-                        if (spriteNum == 1) {
-                            image = down1;
-                        }
-                        if (spriteNum == 2) {
-                            image = down2;
-                        }
-                        if (spriteNum == 3) {
-                            image = down1;
-                        }
-                        if (spriteNum == 4) {
-                            image = down3;
-                        }
-                        if (spriteNum == 5) {
-                            image = down4;
-                        }
-                        if (spriteNum == 6) {
-                            image = down5;
-                        }
-                        if (spriteNum == 7) {
-                            image = down4;
-                        }
-                        if (spriteNum == 8) {
-                            image = down3;
-                        }
-                        }
-                    case "left" -> {
-                        if (spriteNum == 1) {
-                            image = left1;
-                        }
-                        if (spriteNum == 2) {
-                            image = left2;
-                        }
-                        if (spriteNum == 3) {
-                            image = left1;
-                        }
-                        if (spriteNum == 4) {
-                            image = left3;
-                        }
-                        if (spriteNum == 5) {
-                            image = left4;
-                        }
-                        if (spriteNum == 6) {
-                            image = left5;
-                        }
-                        if (spriteNum == 7) {
-                            image = left4;
-                        }
-                        if (spriteNum == 8) {
-                            image = left3;
-                        }
-                        }
-                    case "right" -> {
-                        if (spriteNum == 1) {
-                            image = right1;
-                        }
-                        if (spriteNum == 2) {
-                            image = right2;
-                        }
-                        if (spriteNum == 3) {
-                            image = right1;
-                        }
-                        if (spriteNum == 4) {
-                            image = right3;
-                        }
-                        if (spriteNum == 5) {
-                            image = right4;
-                        }
-                        if (spriteNum == 6) {
-                            image = right5;
-                        }
-                        if (spriteNum == 7) {
-                            image = right4;
-                        }
-                        if (spriteNum == 8) {
-                            image = right3;
-                        }
-                        }
-            
-                    }
-              //  }
+        if (up) {
+            if (spriteNum == 1) {
+                image = up1;
+            }
+            if (spriteNum == 2) {
+                image = up2;
+            }
+            if (spriteNum == 3) {
+                image = up1;
+            }
+            if (spriteNum == 4) {
+                image = up3;
+            }
+            if (spriteNum == 5) {
+                image = up4;
+            }
+            if (spriteNum == 6) {
+                image = up5;
+            }
+            if (spriteNum == 7) {
+                image = up4;
+            }
+            if (spriteNum == 8) {
+                image = up3;
+            }
+        } else
+        if (down) {
+            if (spriteNum == 1) {
+                image = down1;
+            }
+            if (spriteNum == 2) {
+                image = down2;
+            }
+            if (spriteNum == 3) {
+                image = down1;
+            }
+            if (spriteNum == 4) {
+                image = down3;
+            }
+            if (spriteNum == 5) {
+                image = down4;
+            }
+            if (spriteNum == 6) {
+                image = down5;
+            }
+            if (spriteNum == 7) {
+                image = down4;
+            }
+            if (spriteNum == 8) {
+                image = down3;
+            }
+        } else
+        if (left) {
+            if (spriteNum == 1) {
+                image = left1;
+            }
+            if (spriteNum == 2) {
+                image = left2;
+            }
+            if (spriteNum == 3) {
+                image = left1;
+            }
+            if (spriteNum == 4) {
+                image = left3;
+            }
+            if (spriteNum == 5) {
+                image = left4;
+            }
+            if (spriteNum == 6) {
+                image = left5;
+            }
+            if (spriteNum == 7) {
+                image = left4;
+            }
+            if (spriteNum == 8) {
+                image = left3;
+            }
+        } else
+        if (right) {
+            if (spriteNum == 1) {
+                image = right1;
+            }
+            if (spriteNum == 2) {
+                image = right2;
+            }
+            if (spriteNum == 3) {
+                image = right1;
+            }
+            if (spriteNum == 4) {
+                image = right3;
+            }
+            if (spriteNum == 5) {
+                image = right4;
+            }
+            if (spriteNum == 6) {
+                image = right5;
+            }
+            if (spriteNum == 7) {
+                image = right4;
+            }
+            if (spriteNum == 8) {
+                image = right3;
+            }
+        }
+
 
         return image;
     }
@@ -370,6 +388,7 @@ public class Entity {
             gp.cChecker.checkObject(this, gp.obj);
             gp.cChecker.checkEntity(this, gp.npc);
             gp.cChecker.checkEntity(this, gp.monster);
+            gp.cChecker.checkFoilage(this, gp.foilage);
             boolean contactPlayer = gp.cChecker.checkPlayer(this);
 
             if(this.type == 2 && contactPlayer) {
@@ -380,16 +399,22 @@ public class Entity {
             }
             
 
-            if(collisionOn == false) {
-                
-                switch(direction) {
-                case "up" -> worldY -= speed;
-                case "down" -> worldY += speed;
-                case "left" -> worldX -= speed;
-                case "right" -> worldX += speed;
-                        
+            //if(collisionOn == false) {
+                if (up && !collisionUp) {
+                    worldY -= speed;
                 }
-            }
+                if (down && !collisionDown) {
+                    worldY += speed;
+                }
+                if (left && !collisionLeft) {
+                    worldX -= speed;
+                }
+                if (right && !collisionRight) {
+                    worldX += speed;
+                }
+
+
+            //}
         //}
 
         return 999;
@@ -402,32 +427,26 @@ public class Entity {
 
         BufferedImage image = null;
 
-                switch(direction) {
-                    case "up" -> {
-                        if (spriteNumIdle <= 6) {
-                            image = upIdle1;
-                        }
-                }
-                    case "down" -> {
-                        if (spriteNumIdle <= 6) {
-                            image = idle1;
-                        }
-                        
-               }
-                    case "left" -> {
-                        if (spriteNumIdle <= 6) {
-                            image = leftIdle1;
-                        }
-               }
-                    case "right" -> {
-                        if (spriteNumIdle <= 6) {
-                            image = rightIdle1;
-                        }
-               }
-            
-
-
-       }
+        if ("up".equals(direction)) {
+            if (spriteNumIdle <= 6) {
+                image = upIdle1;
+            }
+        } 
+        if (down) {
+            if (spriteNumIdle <= 6) {
+                image = idle1;
+            }
+        } 
+        if (left) {
+            if (spriteNumIdle <= 6) {
+                image = leftIdle1;
+            }
+        } 
+        if (right) {
+            if (spriteNumIdle <= 6) {
+                image = rightIdle1;
+            }
+        }
 
        return image;
 

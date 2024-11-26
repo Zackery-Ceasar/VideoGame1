@@ -1,7 +1,6 @@
 package entity;
 
 import java.awt.AlphaComposite;
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -36,6 +35,12 @@ public class Player extends Entity {
     // NPC
     public int currentNPC;
 
+    //dodge
+    public int dodgeCooldown;
+    public int dodgeTimer = 0;
+    public int dodgeSpeed = 15;
+    public boolean dodge = false;
+
     
 
 
@@ -54,7 +59,7 @@ public class Player extends Entity {
 
         solidArea = new Rectangle();
         solidArea.x = 12;
-        solidArea.y = 26;
+        solidArea.y = 16;
         solidAreaDefaultX = solidArea.x;
         solidAreaDefaultY = solidArea.y;
         solidArea.width = 24;
@@ -74,15 +79,19 @@ public class Player extends Entity {
         worldX = gp.tileSize * 12;
         worldY = gp.tileSize * 25;
         
-        direction = "down";
+        down = true;
         width = gp.tileSize;
         height = gp.tileSize + gp.tileSize/6;
 
+        animationSpeed = 6;
         // Player stats
 
-        speed = 3;
+ 
         maxLife = 100;
         life = maxLife;
+        speed = 3;   // WAS 3
+        dodgeCooldown = 200;
+        
 
 
     }
@@ -184,7 +193,7 @@ public class Player extends Entity {
 
         // animations
 
-        
+        keyCheck();
 
         updateMovingAnimation();
         updateIdleAnimation();
@@ -193,8 +202,10 @@ public class Player extends Entity {
         image = drawIdleAnimation(image);
 
         // check tile collision
-        collisionOn = false;
-
+        collisionUp = false;
+        collisionDown = false;
+        collisionLeft = false;
+        collisionRight = false;
         //NPC COLLISION
 
         int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
@@ -204,6 +215,9 @@ public class Player extends Entity {
 
         int monsterIndex = gp.cChecker.checkEntity(this, gp.monster);
         monsterContact(monsterIndex);
+
+        //FOILAGE COLLSISION
+        gp.cChecker.checkFoilage(this, gp.foilage);
 
 
         //EVENTS 
@@ -220,12 +234,13 @@ public class Player extends Entity {
 
         // Items
 
-            sprint();
+            
 
         // Door functions
             doorUpdateOpen(objIndex);
         }
-        
+
+        dodge();
 
         if(invincible) {
             invincibleCounter++;
@@ -249,16 +264,12 @@ public class Player extends Entity {
     
     public void draw(Graphics2D g2) {
 
-        if (gp.numMap == 0) {
-            g2.setColor(new Color(0, 0, 0, 65));
-            g2.fillOval(screenX + 4, screenY + gp.tileSize-5, gp.tileSize *4/5, gp.tileSize/3);
-        }
 
         if(invincible) {
             g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5F));
         }
 
-        g2.drawImage(image, screenX, screenY, width, height, null);
+        g2.drawImage(image, screenX, screenY-12, width, height, null);
 
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1F));
         
@@ -285,13 +296,14 @@ public class Player extends Entity {
                     
 
                     currentNPC = i;
-                    gp.gameState = gp.dialogueState;
                     gp.npc[gp.numMap][i].speak();
+                    gp.gameState = gp.dialogueState;
+                    
                     
         
-
             
                 }
+                gp.keyH.enterPressed = false;
             }
 
 
@@ -300,7 +312,7 @@ public class Player extends Entity {
         if (gp.gameState == gp.playState) {
             currentNPC = 999;
         }
-        gp.keyH.enterPressed = false;
+        
 
     }
 
@@ -334,7 +346,8 @@ public class Player extends Entity {
                         gp.obj[gp.numMap][i] = null;
                     }
                     case "Chest" -> {
-                        if(hasKey > 0 && keyH.enterPressed) {
+                        //System.out.println("Keys: " + hasKey + " enterPressed: " + gp.keyH.enterPressed); 
+                        if(hasKey > 0) {
                             gp.obj[gp.numMap][i].down1 = gp.obj[gp.numMap][i].alt[1];
                             hasKey--;
                             chestOpen = true;
@@ -375,15 +388,55 @@ public class Player extends Entity {
     ////////////////////////////////////////////////////////////////
 
 
-    public void sprint() {
-        if (hasBoots && keyH.shiftPressed == true) {
-            animationSpeed = 5;
-            speed = 4;
+    public void dodge() {
 
+        if (dodgeTimer > dodgeCooldown) {
+            //System.out.println(dodgeTimer);
+        
+            if (hasBoots && gp.keyH.shiftPressed == true) {
+
+                dodge = true;
+                dodgeTimer = 0;
+            } 
+            
+
+        }
+        dodgeTimer++;
+
+        
+        if (dodgeSpeed > 0  && dodge) {
+                    
+            if(up && !collisionUp) {
+                worldY -= 5;
+                if (left && !collisionLeft) {
+                    worldX -= 5;
+                } else if (right && !collisionRight) {
+                    worldX += 5;
+                }
+            } else
+            if(down && !collisionDown) {
+                worldY += 5;
+                if (left && !collisionLeft) {
+                    worldX -= 5;
+                } else if (right && !collisionRight) {
+                    worldX += 5;
+                }
+            } else
+            if(left && !collisionLeft) {
+                worldX -= 5;
+            } else
+            if(right && !collisionRight) {
+                worldX += 5;
+            }
+
+                dodgeSpeed--;
+
+                if(dodgeSpeed == 0) {
+                    dodge = false;
+                }
 
         } else {
-            speed = 3;   // WAS 3
-            animationSpeed = 6;
+            dodgeSpeed = 15;
         }
 
     }
@@ -497,159 +550,154 @@ public class Player extends Entity {
     public BufferedImage drawMovingAnimation(BufferedImage image) {
         
         if (keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true || keyH.rightPressed == true) {
-        
-                switch(direction) {
-                    case "up" -> {
-                        if (spriteNum == 1) {
-                            image = up1;
-                        }
-                        if (spriteNum == 2) {
-                            image = up2;
-                        }
-                        if (spriteNum == 3) {
-                            image = up1;
-                        }
-                        if (spriteNum == 4) {
-                            image = up3;
-                        }
-                        if (spriteNum == 5) {
-                            image = up4;
-                        }
-                        if (spriteNum == 6) {
-                            image = up5;
-                        }
-                        if (spriteNum == 7) {
-                            image = up4;
-                        }
-                        if (spriteNum == 8) {
-                            image = up3;
-                        }
-                        }
-                    case "down" -> {
-                        if (spriteNum == 1) {
-                            image = down1;
-                        }
-                        if (spriteNum == 2) {
-                            image = down2;
-                        }
-                        if (spriteNum == 3) {
-                            image = down1;
-                        }
-                        if (spriteNum == 4) {
-                            image = down3;
-                        }
-                        if (spriteNum == 5) {
-                            image = down4;
-                        }
-                        if (spriteNum == 6) {
-                            image = down5;
-                        }
-                        if (spriteNum == 7) {
-                            image = down4;
-                        }
-                        if (spriteNum == 8) {
-                            image = down6;
-                        }
-                        }
-                    case "left" -> {
-                        if (spriteNum == 1) {
-                            image = left1;
-                        }
-                        if (spriteNum == 2) {
-                            image = left2;
-                        }
-                        if (spriteNum == 3) {
-                            image = left1;
-                        }
-                        if (spriteNum == 4) {
-                            image = left3;
-                        }
-                        if (spriteNum == 5) {
-                            image = left4;
-                        }
-                        if (spriteNum == 6) {
-                            image = left5;
-                        }
-                        if (spriteNum == 7) {
-                            image = left4;
-                        }
-                        if (spriteNum == 8) {
-                            image = left3;
-                        }
-                        }
-                    case "right" -> {
-                        if (spriteNum == 1) {
-                            image = right1;
-                        }
-                        if (spriteNum == 2) {
-                            image = right2;
-                        }
-                        if (spriteNum == 3) {
-                            image = right1;
-                        }
-                        if (spriteNum == 4) {
-                            image = right3;
-                        }
-                        if (spriteNum == 5) {
-                            image = right4;
-                        }
-                        if (spriteNum == 6) {
-                            image = right5;
-                        }
-                        if (spriteNum == 7) {
-                            image = right4;
-                        }
-                        if (spriteNum == 8) {
-                            image = right3;
-                        }
-                        }
-            
-                    }
+
+            if (up) {
+                if (spriteNum == 1) {
+                    image = up1;
                 }
+                if (spriteNum == 2) {
+                    image = up2;
+                }
+                if (spriteNum == 3) {
+                    image = up1;
+                }
+                if (spriteNum == 4) {
+                    image = up3;
+                }
+                if (spriteNum == 5) {
+                    image = up4;
+                }
+                if (spriteNum == 6) {
+                    image = up5;
+                }
+                if (spriteNum == 7) {
+                    image = up4;
+                }
+                if (spriteNum == 8) {
+                    image = up3;
+                }
+            } 
+            if (down) {
+                if (spriteNum == 1) {
+                    image = down1;
+                }
+                if (spriteNum == 2) {
+                    image = down2;
+                }
+                if (spriteNum == 3) {
+                    image = down1;
+                }
+                if (spriteNum == 4) {
+                    image = down3;
+                }
+                if (spriteNum == 5) {
+                    image = down4;
+                }
+                if (spriteNum == 6) {
+                    image = down5;
+                }
+                if (spriteNum == 7) {
+                    image = down4;
+                }
+                if (spriteNum == 8) {
+                    image = down6;
+                }
+            }
+            if (left) {
+                if (spriteNum == 1) {
+                    image = left1;
+                }
+                if (spriteNum == 2) {
+                    image = left2;
+                }
+                if (spriteNum == 3) {
+                    image = left1;
+                }
+                if (spriteNum == 4) {
+                    image = left3;
+                }
+                if (spriteNum == 5) {
+                    image = left4;
+                }
+                if (spriteNum == 6) {
+                    image = left5;
+                }
+                if (spriteNum == 7) {
+                    image = left4;
+                }
+                if (spriteNum == 8) {
+                    image = left3;
+                }
+            }
+            if (right) {
+                if (spriteNum == 1) {
+                    image = right1;
+                }
+                if (spriteNum == 2) {
+                    image = right2;
+                }
+                if (spriteNum == 3) {
+                    image = right1;
+                }
+                if (spriteNum == 4) {
+                    image = right3;
+                }
+                if (spriteNum == 5) {
+                    image = right4;
+                }
+                if (spriteNum == 6) {
+                    image = right5;
+                }
+                if (spriteNum == 7) {
+                    image = right4;
+                }
+                if (spriteNum == 8) {
+                    image = right3;
+                }
+            }
+   }
 
         return image;
     }
 
+
+
     public BufferedImage drawIdleAnimation(BufferedImage image) {
         if (keyH.upPressed == false && keyH.downPressed == false && keyH.leftPressed == false && keyH.rightPressed == false) {
-                switch(direction) {
-                    case "up" -> {
-                        if (spriteNumIdle <= 6) {
-                            image = upIdle1;
-                        }
+                if (up) {
+                    if (spriteNumIdle <= 6) {
+                        image = upIdle1;
+                    }
                 }
-                    case "down" -> {
-                        if (spriteNumIdle == 1) {
-                            image = idle1;
-                        }
-                        if (spriteNumIdle == 2) {
-                            image = idle2;
-                        }
-                        if (spriteNumIdle == 3) {
-                            image = idle3;
-                        }
-                        if (spriteNumIdle == 4) {
-                            image = idle4;
-                        }
-                        if (spriteNumIdle == 5) {
-                            image = idle3;
-                        }
-                        if (spriteNumIdle == 6) {
-                            image = idle2;
-                        }
-                        
-               }
-                    case "left" -> {
-                        if (spriteNumIdle <= 6) {
-                            image = leftIdle1;
-                        }
-               }
-                    case "right" -> {
-                        if (spriteNumIdle <= 6) {
-                            image = rightIdle1;
-                        }
-               }
-            
+                if (down) {
+                    if (spriteNumIdle == 1) {
+                        image = idle1;
+                    }
+                    if (spriteNumIdle == 2) {
+                        image = idle2;
+                    }
+                    if (spriteNumIdle == 3) {
+                        image = idle3;
+                    }
+                    if (spriteNumIdle == 4) {
+                        image = idle4;
+                    }
+                    if (spriteNumIdle == 5) {
+                        image = idle3;
+                    }
+                    if (spriteNumIdle == 6) {
+                        image = idle2;
+                    }
+                }
+                if (left) {
+                    if (spriteNumIdle <= 6) {
+                        image = leftIdle1;
+                    }
+                }
+                if (right) {
+                    if (spriteNumIdle <= 6) {
+                        image = rightIdle1;
+                    }
                 }
 
 
@@ -663,6 +711,59 @@ public class Player extends Entity {
 
 
 
+    public void keyCheck() {
+
+        
+        if (keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true || keyH.rightPressed == true) {
+
+            if (gp.keyH.upPressed == true) {
+                direction = "up";
+            }
+            if (gp.keyH.downPressed == true) {
+                direction = "down";
+            }
+            if (gp.keyH.leftPressed == true) {
+                direction = "left";
+            }
+            if (gp.keyH.rightPressed == true) {
+                direction = "right";
+            }
+
+            
+
+
+            up = keyH.upPressed == true;
+            down = keyH.downPressed == true;
+            left = keyH.leftPressed == true;
+            right = keyH.rightPressed == true;
+        }
+
+        // prevDirection = direction;
+        // if ("up".equals(prevDirection)) {
+        //     up = true;
+        //     down = false;
+        //     left = false;
+        //     right = false;
+        // } else if ("down".equals(prevDirection)) {
+        //     up = false;
+        //     down = true;
+        //     left = false;
+        //     right = false;
+        // } else if ("left".equals(prevDirection)) {
+        //     up = false;
+        //     down = false;
+        //     left = true;
+        //     right = false;
+        // } else if ("right".equals(prevDirection)) {
+        //     up = false;
+        //     down = false;
+        //     left = false;
+        //     right = true;
+        // }
+        
+        
+    
+    }
 
     
 
@@ -670,20 +771,6 @@ public class Player extends Entity {
     @Override
     public void updateMovingAnimation() {
         if (keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true || keyH.rightPressed == true) {
-            if(keyH.upPressed == true) {
-                direction = "up";
-                
-            } else if (keyH.downPressed == true) {
-                direction = "down";
-                
-            } else if (keyH.leftPressed == true) {
-                direction = "left";
-                
-            } else if (keyH.rightPressed == true) {
-                direction = "right";
-                
-            }
-
 
             spriteCounter++;
             if (spriteCounter > animationSpeed) {
@@ -730,25 +817,73 @@ public class Player extends Entity {
         }
     }
 
+    @Override
     public int collisionDetector() {
-        if (keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true || keyH.rightPressed == true) {
+        
 
 
-            gp.cChecker.checkTile(this, gp.numMap);
-            int i = gp.cChecker.checkObject(this, gp.obj);
-            //int i = gp.cChecker.checkEntity(this, gp.obj);
-            
+        gp.cChecker.checkTile(this, gp.numMap);
+        int i = gp.cChecker.checkObject(this, gp.obj);
+        //int i = gp.cChecker.checkEntity(this, gp.obj);
 
-            if(collisionOn == false) {
-                
-                switch(direction) {
-                case "up" -> worldY -= speed;
-                case "down" -> worldY += speed;
-                case "left" -> worldX -= speed;
-                case "right" -> worldX += speed;
-                        
-                }
+            if (keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true || keyH.rightPressed == true) {
+
+          //  if(collisionOn == false) {
+
+            if(up && !collisionUp) {
+                worldY -= speed;
+                if (left && !collisionLeft) {
+                    worldX -= speed;
+                } else if (right && !collisionRight) {
+                    worldX += speed;
+                } 
+            } else
+            if(down && !collisionDown) {
+                worldY += speed;
+                if (left && !collisionLeft) {
+                    worldX -= speed;
+                } else if (right && !collisionRight) {
+                    worldX += speed;
+                } 
+            } else 
+            if(left && !collisionLeft) {
+                worldX -= speed;
+                if (up && !collisionUp) {
+                    worldY -= speed;
+                } else if (down && !collisionDown) {
+                    worldY += speed;
+                } 
+
+            } else
+            if(right && !collisionRight) {
+                worldX += speed;
+                if (up && !collisionUp) {
+                    worldY -= speed;
+                } else if (down && !collisionDown) {
+                    worldY += speed;
+                } 
+            } else 
+            if(down && collisionDown) {
+                //System.out.println(left + "\nCollisionLeft: " + collisionLeft);
+                if (left && !collisionLeft) {
+                    worldX -= speed;
+                } else if (right && !collisionRight) {
+                    worldX += speed;
+                } 
             }
+                // ADD MORE CONDITIONALS USING IF, SO IF UP OR UP AND LEFT IS TRUE, BUT COLLISION UP TRUE, MOVE LEFT AND IGHT
+                //System.out.println(collisionUp);
+                //System.out.println(collisionDown);
+                //System.out.println(collisionLeft);
+                //System.out.println(collisionRight);
+                //switch(direction) {
+                //case "up" -> worldY -= speed;
+                //case "down" -> worldY += speed;
+                //case "left" -> worldX -= speed;
+                //case "right" -> worldX += speed;
+                        
+                //}
+           // }
             return i;
         }
         return 999;

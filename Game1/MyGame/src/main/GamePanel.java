@@ -15,7 +15,6 @@ import messages.MessageManager;
 import tile.MapManager;
 import tile.RandomAnimation;
 import tile.TileManager;
-import tile.treeManager;
 
 
 
@@ -61,13 +60,13 @@ public class GamePanel extends JPanel implements Runnable {
     public MessageManager mManager = new MessageManager(this);
     public Player player = new Player(this, keyH, aSetter, mManager);
     public MapManager mapM = new MapManager(this);
-    public treeManager treeM = new treeManager(this);
     public UI ui = new UI(this);
     public EventHandler eHandler = new EventHandler(this);
     
     public Entity obj[][] = new Entity[tileM.numMaps][objectQTY];
     public Entity npc[][] = new Entity[tileM.numMaps][NPCQTY];
-    public Entity monster[][] = new Entity[tileM.numMaps][50];
+    public Entity monster[][] = new Entity[tileM.numMaps][15];
+    public Entity foilage[][] = new Entity[tileM.numMaps][40];
 
     ArrayList<Entity> entityList0 = new ArrayList<>();
     ArrayList<Entity> entityList1 = new ArrayList<>();
@@ -93,6 +92,7 @@ public class GamePanel extends JPanel implements Runnable {
         aSetter.setObject();
         aSetter.setNPC();
         aSetter.setMonster();
+        aSetter.setFoilage();
         gameState = titleState;
     }
 
@@ -162,6 +162,7 @@ public class GamePanel extends JPanel implements Runnable {
 
 
 
+
         if (gameState == pauseState) {
 
         }
@@ -206,7 +207,6 @@ public class GamePanel extends JPanel implements Runnable {
             numMap = mapM.checkLocation();
             tileM.draw(g2, numMap);
             rAnimate.animateRandom(g2, numMap);
-            treeM.drawBehind(g2, numMap, 0);
 
 
             // ADDED ENTITIES TO LIST
@@ -238,11 +238,22 @@ public class GamePanel extends JPanel implements Runnable {
                     }
                 }
 
+                for(int i = 0; i < foilage[0].length; i++) {
+                    if(foilage[0][i] != null) {
+                        entityList0.add(foilage[0][i]);
+                    }
+                }
+
                 Collections.sort(entityList0, new Comparator<Entity>() {
                     @Override
                     public int compare(Entity e1, Entity e2) {
-                        int result = Integer.compare(e1.worldY, e2.worldY);
+                        getLocationCollisionY(e1, e2);
+
+                        int result = Integer.compare(e1.solidArea.y, e2.solidArea.y);
+
+                        resetLocationCollisionY(e1, e2);
                         return result;
+                        
                     }
 
 
@@ -289,11 +300,21 @@ public class GamePanel extends JPanel implements Runnable {
                     }
                 }
 
+                for(int i = 0; i < foilage[0].length; i++) {
+                    if(foilage[1][i] != null) {
+                        entityList1.add(foilage[1][i]);
+                    }
+                }
+
 
                 Collections.sort(entityList1, new Comparator<Entity>() {
                     @Override
                     public int compare(Entity e1, Entity e2) {
-                        int result = Integer.compare(e1.worldY, e2.worldY);
+                        getLocationCollisionY(e1, e2);
+
+                        int result = Integer.compare(e1.solidArea.y, e2.solidArea.y);
+
+                        resetLocationCollisionY(e1, e2);
                         return result;
                     }
 
@@ -318,52 +339,8 @@ public class GamePanel extends JPanel implements Runnable {
             }
 
 
-            
-
-            
-            //obj[0][3].draw(g2);
-            //g2.drawImage(obj[0][3].down1, player.screenX, player.screenY, null);
-            
 
 
-            /* 
-
-            //Object
-            for (int i = 0; i < objectQTY; i++) {
-                if (obj[numMap][i] != null) {
-                    obj[numMap][i].drawBehind(g2);
-                }
-            }
-
-            //NPC BEHIND
-            for (int i = 0; i < NPCQTY; i++) {
-                if (npc[numMap][i] != null) {
-                    npc[numMap][i].drawBehind(g2);
-                }
-            }
-
-            // player
-            player.draw(g2);
-
-            //NPC FRONT
-            for (int i = 0; i < NPCQTY; i++) {
-                if (npc[numMap][i] != null) {
-                    npc[numMap][i].drawFront(g2);
-                }
-            }
-
-            //Object
-            for (int i = 0; i < objectQTY; i++) {
-                if (obj[numMap][i] != null) {
-                    obj[numMap][i].drawFront(g2);
-                }
-            }
-
-            */
-
-
-
-            treeM.drawFront(g2, numMap, 0);
             ui.draw(g2);
             mManager.sendMessage(g2);
 
@@ -427,6 +404,18 @@ public class GamePanel extends JPanel implements Runnable {
     public void setTileM(TileManager tileM) {
         this.tileM = tileM;
     }
+
+    void getLocationCollisionY(Entity entity1, Entity entity2) {
+        entity1.solidArea.y = entity1.worldY + entity1.solidArea.y;
+        entity2.solidArea.y = entity2.worldY + entity2.solidArea.y;
+    }
+
+    void resetLocationCollisionY(Entity entity1, Entity entity2) {
+        entity1.solidArea.y = entity1.solidAreaDefaultY;
+        entity2.solidArea.y = entity2.solidAreaDefaultY;
+    }
+
+    
 
     
 }
